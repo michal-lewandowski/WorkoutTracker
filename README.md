@@ -24,6 +24,7 @@ with [FrankenPHP](https://frankenphp.dev) and [Caddy](https://caddyserver.com/) 
 - Real-time messaging thanks to a built-in [Mercure hub](https://symfony.com/doc/current/mercure.html)
 - [Vulcain](https://vulcain.rocks) support
 - Native [XDebug](docs/xdebug.md) integration
+- **Integrated [Swagger UI](docs/swagger-api.md) for API documentation** (available at http://localhost:8081)
 - Super-readable configuration
 
 **Enjoy!**
@@ -41,6 +42,7 @@ with [FrankenPHP](https://frankenphp.dev) and [Caddy](https://caddyserver.com/) 
 9. [Using a Makefile](docs/makefile.md)
 10. [Updating the template](docs/updating.md)
 11. [Troubleshooting](docs/troubleshooting.md)
+12. **[API Documentation with Swagger UI](docs/swagger-api.md)** - Complete guide for API documentation
 
 ## License
 

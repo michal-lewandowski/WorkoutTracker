@@ -1,5 +1,21 @@
 ---
 services:
+  # Nginx Reverse Proxy
+  nginx:
+    image: nginx:alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - .docker/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - .docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - .docker/nginx/ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - php
+      - frontend
+
+  # Symfony Backend
   php:
     image: ${IMAGES_PREFIX:-}app-php
     restart: unless-stopped
@@ -13,25 +29,37 @@ services:
       MERCURE_URL: ${CADDY_MERCURE_URL:-http://php/.well-known/mercure}
       MERCURE_PUBLIC_URL: ${CADDY_MERCURE_PUBLIC_URL:-https://${SERVER_NAME:-localhost}:${HTTPS_PORT:-443}/.well-known/mercure}
       MERCURE_JWT_SECRET: ${CADDY_MERCURE_JWT_SECRET:-!ChangeThisMercureHubJWTSecretKey!}
+      # CORS configuration for Swagger UI
+      CORS_ALLOW_ORIGIN: '^https?://(localhost|127\.0\.0\.1)(:[0-9]+)?$$'
       # The two next lines can be removed after initial installation
       SYMFONY_VERSION: ${SYMFONY_VERSION:-}
       STABILITY: ${STABILITY:-stable}
     volumes:
       - caddy_data:/data
       - caddy_config:/config
+    expose:
+      - "80"
+
+  # Next.js Frontend
+  frontend:
+    image: ${IMAGES_PREFIX:-}app-frontend
+    restart: unless-stopped
+    expose:
+      - "3000"
+    environment:
+      - NODE_ENV=production
+
+  swagger-ui:
+    image: swaggerapi/swagger-ui:latest
+    restart: unless-stopped
     ports:
-      # HTTP
-      - target: 80
-        published: ${HTTP_PORT:-80}
-        protocol: tcp
-      # HTTPS
-      - target: 443
-        published: ${HTTPS_PORT:-443}
-        protocol: tcp
-      # HTTP/3
-      - target: 443
-        published: ${HTTP3_PORT:-443}
-        protocol: udp
+      - "8081:8080"
+    environment:
+      SWAGGER_JSON_URL: "./swagger.json"
+    volumes:
+      - ./docs/swagger.json:/usr/share/nginx/html/swagger.json:ro
+    depends_on:
+      - php
 
 # Mercure is installed as a Caddy module, prevent the Flex recipe from installing another service
 ###> symfony/mercure-bundle ###

@@ -9,3 +9,11 @@ services:
       APP_SECRET: ${APP_SECRET}
       MERCURE_PUBLISHER_JWT_KEY: ${CADDY_MERCURE_JWT_SECRET}
       MERCURE_SUBSCRIBER_JWT_KEY: ${CADDY_MERCURE_JWT_SECRET}
+
+  # Next.js Frontend Production
+  frontend:
+    build:
+      context: ./frontend
+      target: runner
+    environment:
+      - NODE_ENV=production

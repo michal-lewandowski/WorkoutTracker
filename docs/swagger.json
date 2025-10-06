@@ -1,0 +1,386 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Symfony API Documentation",
+    "description": "Dokumentacja API dla aplikacji Symfony",
+    "version": "1.0.0",
+    "contact": {
+      "name": "Twoja nazwa",
+      "email": "twoj@email.com"
+    }
+  },
+  "servers": [
+    {
+      "url": "https://localhost",
+      "description": "Serwer deweloperski HTTPS"
+    },
+    {
+      "url": "http://localhost",
+      "description": "Development HTTP"
+    }
+  ],
+  "paths": {
+    "/api/health": {
+      "get": {
+        "summary": "Sprawdź status aplikacji",
+        "description": "Endpoint do sprawdzania czy aplikacja działa poprawnie",
+        "tags": ["Health Check"],
+        "responses": {
+          "200": {
+            "description": "Aplikacja działa poprawnie",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "OK"
+                    },
+                    "timestamp": {
+                      "type": "string",
+                      "format": "date-time",
+                      "example": "2025-09-30T12:00:00Z"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/users": {
+      "get": {
+        "summary": "Pobierz listę użytkowników",
+        "description": "Zwraca listę wszystkich użytkowników",
+        "tags": ["Users"],
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Numer strony",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Liczba elementów na stronie",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 10
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista użytkowników",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "users": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/User"
+                      }
+                    },
+                    "pagination": {
+                      "$ref": "#/components/schemas/Pagination"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Utwórz nowego użytkownika",
+        "description": "Tworzy nowego użytkownika w systemie",
+        "tags": ["Users"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Użytkownik został utworzony",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Błędne dane wejściowe",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/users/{id}": {
+      "get": {
+        "summary": "Pobierz użytkownika po ID",
+        "description": "Zwraca szczegóły użytkownika o podanym ID",
+        "tags": ["Users"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "ID użytkownika",
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Szczegóły użytkownika",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Użytkownik nie został znaleziony",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "summary": "Zaktualizuj użytkownika",
+        "description": "Aktualizuje dane użytkownika o podanym ID",
+        "tags": ["Users"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "ID użytkownika",
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Użytkownik został zaktualizowany",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Użytkownik nie został znaleziony",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Usuń użytkownika",
+        "description": "Usuwa użytkownika o podanym ID",
+        "tags": ["Users"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "ID użytkownika",
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Użytkownik został usunięty"
+          },
+          "404": {
+            "description": "Użytkownik nie został znaleziony",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "User": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64",
+            "example": 1
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "example": "jan.kowalski@example.com"
+          },
+          "name": {
+            "type": "string",
+            "example": "Jan Kowalski"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2025-09-30T12:00:00Z"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2025-09-30T12:00:00Z"
+          }
+        },
+        "required": ["id", "email", "name", "created_at", "updated_at"]
+      },
+      "UserCreate": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "example": "jan.kowalski@example.com"
+          },
+          "name": {
+            "type": "string",
+            "example": "Jan Kowalski"
+          },
+          "password": {
+            "type": "string",
+            "minLength": 8,
+            "example": "bezpieczne_haslo123"
+          }
+        },
+        "required": ["email", "name", "password"]
+      },
+      "UserUpdate": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "example": "jan.kowalski@example.com"
+          },
+          "name": {
+            "type": "string",
+            "example": "Jan Kowalski"
+          }
+        }
+      },
+      "Pagination": {
+        "type": "object",
+        "properties": {
+          "current_page": {
+            "type": "integer",
+            "example": 1
+          },
+          "per_page": {
+            "type": "integer",
+            "example": 10
+          },
+          "total": {
+            "type": "integer",
+            "example": 50
+          },
+          "total_pages": {
+            "type": "integer",
+            "example": 5
+          }
+        },
+        "required": ["current_page", "per_page", "total", "total_pages"]
+      },
+      "Error": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "string",
+            "example": "Wystąpił błąd"
+          },
+          "message": {
+            "type": "string",
+            "example": "Szczegółowy opis błędu"
+          },
+          "code": {
+            "type": "integer",
+            "example": 400
+          }
+        },
+        "required": ["error", "message", "code"]
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "Health Check",
+      "description": "Operacje związane ze statusem aplikacji"
+    },
+    {
+      "name": "Users",
+      "description": "Operacje związane z użytkownikami"
+    }
+  ]
+}
