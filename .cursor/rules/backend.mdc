@@ -1,0 +1,308 @@
+---
+alwaysApply: true
+---
+# Symfony 7.3 & PHP 8.4 Backend Development Rules
+
+## General PHP 8.4 Guidelines
+
+- Use strict types in every file: `declare(strict_types=1);`
+- Apply typed properties for all class properties
+- Use enums instead of class constants
+- Prefer readonly properties and classes where possible
+- Use named arguments for better readability
+- Use constructor property promotion
+- Utilize null safe operator (?->) and nullsafe coalescing
+- Use match expressions instead of switch where possible
+- Use array destructuring and spread operator
+
+## Architecture and Structure
+
+- Apply hexagonal architecture (Ports & Adapters) or Clean Architecture
+- Organize code by features (feature-based), not layers
+- Directory structure:
+  ```
+  src/
+    ├── Application/     # Use cases, DTOs, Interfaces
+    ├── Domain/          # Entities, Value Objects, Domain Services
+    ├── Infrastructure/  # Implementations (Repository, API clients, Controllers)
+  ```
+- Separate business logic from framework
+- Use Dependency Injection instead of Service Locator
+
+## Symfony Best Practices
+
+### Controllers
+
+- Controllers should be thin - only routing and validation
+- Use #[Route] attributes instead of YAML/XML
+- Apply #[MapRequestPayload] and #[MapQueryString] for auto-deserialization
+- Return JsonResponse or use #[MapResponse] attribute
+- Don't inject EntityManager into controllers - only services/repositories
+- Example:
+
+```php
+#[Route('/api/users', methods: ['POST'])]
+public function create(
+    #[MapRequestPayload] CreateUserDto $dto,
+    CreateUserHandler $handler
+): JsonResponse {
+    $user = $handler->handle($dto);
+    return $this->json($user, Response::HTTP_CREATED);
+}
+```
+
+### Services
+
+- Mark services as final
+- Use constructor property promotion
+- Inject specific dependencies, not containers
+- One service = one responsibility (SRP)
+- Services should be stateless
+- Use interfaces for domain services
+
+### Entities and Doctrine
+
+- Use #[ORM\Entity] attributes
+- Mark entities as readonly where possible
+- Don't use public setters - only named constructors and business methods
+- Use Value Objects for complex types
+- Use Doctrine Embeddables for Value Objects
+- Prefer UUID/ULID instead of auto-increment ID
+- Use #[ORM\Column] with full type configuration
+- Use Doctrine Events or Domain Events instead of lifecycle callbacks
+- Validate data in constructor or business methods
+- Example:
+
+```php
+#[ORM\Entity]
+#[ORM\Table(name: 'users')]
+final readonly class User
+{
+    #[ORM\Id]
+    #[ORM\Column(type: 'uuid', unique: true)]
+    private Uuid $id;
+    
+    #[ORM\Column(length: 255)]
+    private string $email;
+    
+    private function __construct(
+        Uuid $id,
+        Email $email
+    ) {
+        $this->id = $id;
+        $this->email = $email->value;
+    }
+    
+    public static function create(Email $email): self
+    {
+        return new self(Uuid::v7(), $email);
+    }
+}
+```
+
+### Repositories
+
+- Repositories should return domain objects, not arrays
+- Use interfaces for repositories
+- Implementations in Infrastructure/
+- Don't add methods like findAll() without pagination
+- Use QueryBuilder for complex queries
+- Use DTOs for projection query results
+- Interface example:
+
+```php
+interface UserRepositoryInterface
+{
+    public function save(User $user): void;
+    public function findById(Uuid $id): ?User;
+    public function findByEmail(Email $email): ?User;
+    public function findPaginated(int $page, int $limit): PaginatedResult;
+}
+```
+
+### Value Objects
+
+- Immutable classes with validation in constructor
+- Mark as readonly
+- Implement equals() and toString() methods
+- Use as Doctrine Embeddables
+- Example:
+
+```php
+#[ORM\Embeddable]
+final readonly class Email
+{
+    #[ORM\Column(length: 255)]
+    public string $value;
+    
+    public function __construct(string $value)
+    {
+        if (!filter_var($value, FILTER_VALIDATE_EMAIL)) {
+            throw new InvalidArgumentException('Invalid email format');
+        }
+        $this->value = $value;
+    }
+    
+    public function equals(self $other): bool
+    {
+        return $this->value === $other->value;
+    }
+}
+```
+
+### DTOs (Data Transfer Objects)
+
+- Use for request/response payloads
+- Readonly classes with typed properties
+- Apply Symfony Serializer attributes
+- Add Symfony Validator constraints
+- Example:
+
+```php
+final readonly class CreateUserDto
+{
+    public function __construct(
+        #[Assert\NotBlank]
+        #[Assert\Email]
+        public string $email,
+        
+        #[Assert\NotBlank]
+        #[Assert\Length(min: 8)]
+        public string $password,
+    ) {}
+}
+```
+
+### Validation
+
+- Use Symfony Validator with attributes
+- Validate at DTO level (input validation)
+- Validate at domain level (business rules)
+- Create custom validators for complex rules
+- Use validation groups for different contexts
+
+### Security
+
+- Use Security Voters for authorization
+- Use #[IsGranted] attribute in controllers
+- Hash passwords through UserPasswordHasherInterface
+- Never log sensitive data
+- Use CSRF protection for form API
+- Apply rate limiting for API endpoints
+- Validate all user inputs
+- Use parameterized queries (Doctrine does this automatically)
+
+### Tests
+
+- Structure: tests/ mirrors src/
+- Unit tests for business logic (Domain, Application)
+- Integration tests for Infrastructure
+- Functional tests for API endpoints
+- Use PHPUnit 11+
+- Apply data providers for parametric tests
+- Mock external dependencies
+- Use Symfony\Bundle\FrameworkBundle\Test\WebTestCase for API tests
+- Unit test example:
+
+```php
+final class EmailTest extends TestCase
+{
+    public function testValidEmail(): void
+    {
+        $email = new Email('test@example.com');
+        self::assertSame('test@example.com', $email->value);
+    }
+    
+    public function testInvalidEmailThrowsException(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        new Email('invalid-email');
+    }
+}
+```
+
+### Configuration
+
+- Use .env for environment variables
+- Never commit .env.local
+- Service configuration in PHP (config/services.php)
+- Use autowiring and autoconfigure
+- Apply tagged services for strategy pattern
+
+### Messaging and Events
+
+- Use Symfony Messenger for asynchronous tasks
+- Domain events for communication between bounded contexts
+- Apply #[AsMessageHandler] attribute
+- Configure transport (Redis, RabbitMQ, Doctrine)
+- Implement retry strategy
+- Example:
+
+```php
+#[AsMessageHandler]
+final readonly class SendWelcomeEmailHandler
+{
+    public function __construct(
+        private MailerInterface $mailer
+    ) {}
+    
+    public function __invoke(UserRegistered $event): void
+    {
+        // Send email logic
+    }
+}
+```
+
+### API
+
+- Create controllers for each endpoint
+- Use JSON format
+- Version API through URL (/api/v1/...)
+- Implement HATEOAS
+- Use proper HTTP status codes
+- Document through OpenAPI (Swagger)
+- Rate limiting per endpoint
+
+### Logging
+
+- Use Monolog
+- Different channels for different application parts
+- Log structure: context + extra data
+- Never log passwords, tokens, personal data
+- Log levels: DEBUG < INFO < NOTICE < WARNING < ERROR < CRITICAL
+- Use processors for additional information
+
+### Performance
+
+- Use Doctrine query result cache
+- Lazy loading for relations
+- Index database columns
+- Use CQRS for reads (Query DTO instead of entities)
+
+## Quality Tools
+
+- PHP CS Fixer with PSR-12 + Symfony ruleset
+- PHPStan level 9 (max)
+
+## General Best Practices
+
+- SOLID principles
+- DRY (Don't Repeat Yourself)
+- KISS (Keep It Simple, Stupid)
+- YAGNI (You Aren't Gonna Need It)
+- Composition over inheritance
+- Fail fast - validate early
+- Exception handling - custom exceptions for business errors
+- Document only complex logic
+- Git: conventional commits, feature branches
+- Code review mandatory before merge
+
+## Don't Do This
+
+- ❌ Don't use static methods (except factory methods)
+- ❌ Don't use global state
+- ❌ Don't mix business logic with framework
+- ❌ Don't keep logic in controllers
+- ❌ Don't ignore errors (empty catch blocks)
+- ❌ Don't use @var phpdoc - use typed properties
+- ❌ Don't create god objects (oversized classes)

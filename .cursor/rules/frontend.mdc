@@ -1,0 +1,339 @@
+---
+alwaysApply: true
+---
+# WorkoutTracker - Next.js Frontend Rules
+
+## Project Context
+Student project - workout tracking app (MVP). Backend: Symfony REST API. Stack: Next.js 14, TypeScript, Tailwind CSS.
+
+## Core Principles
+- **Keep it simple** - this is a learning project, prioritize clarity over clever solutions
+- **TypeScript first** - always use proper types, avoid `any`
+- **Component-based** - small, reusable components
+- **Responsive design** - mobile-first approach with Tailwind
+
+## Tech Stack
+- **Framework**: Next.js 14 (App Router)
+- **Language**: TypeScript
+- **Styling**: Tailwind CSS
+- **Data Fetching**: Native fetch with Next.js server actions where possible
+- **Forms**: React Hook Form + Zod validation
+- **State**: React useState/useContext (keep it simple for MVP)
+
+## Project Structure
+```
+frontend/
+├── src/
+│   ├── app/                   # Next.js App Router pages
+│   │   ├── (auth)/            # Auth pages (login, register)
+│   │   ├── dashboard/         # Main app pages
+│   │   ├── workouts/          # Workout sessions
+│   │   └── exercises/         # Exercise dictionary
+│   ├── components/
+│   │   ├── ui/               # Reusable UI components (buttons, inputs, cards)
+│   │   ├── forms/            # Form components
+│   │   └── layout/           # Layout components (navbar, footer)
+│   ├── lib/
+│   │   ├── api.ts            # API client & fetch utilities
+│   │   ├── types.ts          # TypeScript types/interfaces
+│   │   └── utils.ts          # Helper functions
+│   └── hooks/                # Custom React hooks
+├── public/                    # Static assets
+├── .env.local                 # Environment variables
+├── next.config.js
+├── tailwind.config.js
+├── tsconfig.json
+└── package.json
+```
+
+## Naming Conventions
+- **Components**: PascalCase - `WorkoutCard.tsx`, `ExerciseForm.tsx`
+- **Files**: kebab-case for non-components - `api-client.ts`, `workout-utils.ts`
+- **Functions**: camelCase - `fetchWorkouts()`, `calculateMaxWeight()`
+- **Types/Interfaces**: PascalCase - `Workout`, `Exercise`, `WorkoutSession`
+- **CSS classes**: Tailwind utility classes only
+
+## TypeScript Guidelines
+```typescript
+// ✅ GOOD - Define clear interfaces
+interface Workout {
+  id: number;
+  userId: number;
+  date: string;
+  exercises: Exercise[];
+}
+
+interface Exercise {
+  id: number;
+  name: string;
+  sets: number;
+  reps: number;
+  weight: number;
+}
+
+// ✅ GOOD - Type function parameters and returns
+async function fetchWorkouts(userId: number): Promise<Workout[]> {
+  // implementation
+}
+
+// ❌ BAD - Avoid any
+function processData(data: any) { }
+
+// ✅ GOOD - Use type inference where obvious
+const [workouts, setWorkouts] = useState<Workout[]>([]);
+```
+
+## API Integration
+```typescript
+// Create centralized API client in lib/api.ts
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
+
+export async function apiClient<T>(
+  endpoint: string,
+  options?: RequestInit
+): Promise<T> {
+  const response = await fetch(`${API_URL}${endpoint}`, {
+    ...options,
+    headers: {
+      'Content-Type': 'application/json',
+      ...options?.headers,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error(`API Error: ${response.statusText}`);
+  }
+
+  return response.json();
+}
+
+// Usage in components
+const workouts = await apiClient<Workout[]>('/workouts');
+```
+
+## Component Guidelines
+```typescript
+// ✅ GOOD - Small, focused components
+interface WorkoutCardProps {
+  workout: Workout;
+  onDelete?: (id: number) => void;
+}
+
+export function WorkoutCard({ workout, onDelete }: WorkoutCardProps) {
+  return (
+    <div className="bg-white rounded-lg shadow p-4">
+      <h3 className="text-lg font-semibold">{workout.date}</h3>
+      {/* content */}
+    </div>
+  );
+}
+
+// ✅ GOOD - Use 'use client' only when needed
+'use client';
+// Only for components with interactivity (onClick, useState, etc.)
+
+// ✅ GOOD - Server components by default
+export default function WorkoutsPage() {
+  // Fetch data directly in server component
+  const workouts = await fetchWorkouts();
+  return <WorkoutList workouts={workouts} />;
+}
+```
+
+## Tailwind CSS Best Practices
+```typescript
+// ✅ GOOD - Use Tailwind utility classes
+<button className="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded">
+  Add Workout
+</button>
+
+// ✅ GOOD - Responsive design
+<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+
+// ✅ GOOD - Extract repeated styles to components
+function PrimaryButton({ children, ...props }) {
+  return (
+    <button 
+      className="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded transition"
+      {...props}
+    >
+      {children}
+    </button>
+  );
+}
+
+// ❌ BAD - Don't use inline styles
+<div style={{ color: 'red' }}>
+```
+
+## Form Handling
+```typescript
+// Install: npm install react-hook-form zod @hookform/resolvers
+
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+
+const workoutSchema = z.object({
+  date: z.string().min(1, 'Date is required'),
+  exercises: z.array(z.object({
+    exerciseId: z.number(),
+    sets: z.number().min(1),
+    reps: z.number().min(1),
+    weight: z.number().min(0),
+  })),
+});
+
+type WorkoutFormData = z.infer<typeof workoutSchema>;
+
+export function WorkoutForm() {
+  const { register, handleSubmit, formState: { errors } } = useForm<WorkoutFormData>({
+    resolver: zodResolver(workoutSchema),
+  });
+
+  const onSubmit = async (data: WorkoutFormData) => {
+    await apiClient('/workouts', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  };
+
+  return (
+    <form onSubmit={handleSubmit(onSubmit)}>
+      {/* form fields */}
+    </form>
+  );
+}
+```
+
+## State Management (Keep Simple)
+```typescript
+// ✅ GOOD - useState for component state
+const [workouts, setWorkouts] = useState<Workout[]>([]);
+
+// ✅ GOOD - useContext for auth state
+// lib/auth-context.tsx
+const AuthContext = createContext<AuthContextType | null>(null);
+
+export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const [user, setUser] = useState<User | null>(null);
+  return (
+    <AuthContext.Provider value={{ user, setUser }}>
+      {children}
+    </AuthContext.Provider>
+  );
+}
+
+// ❌ BAD - Don't overcomplicate with Redux for MVP
+```
+
+## Error Handling
+```typescript
+// ✅ GOOD - Handle errors gracefully
+async function fetchWorkouts() {
+  try {
+    const workouts = await apiClient<Workout[]>('/workouts');
+    return workouts;
+  } catch (error) {
+    console.error('Failed to fetch workouts:', error);
+    // Show user-friendly error message
+    return [];
+  }
+}
+
+// ✅ GOOD - Loading states
+const [loading, setLoading] = useState(true);
+const [error, setError] = useState<string | null>(null);
+```
+
+## Environment Variables
+```bash
+# .env.local
+NEXT_PUBLIC_API_URL=http://localhost:8000/api
+```
+
+## MVP Features Checklist
+- [ ] User authentication (login/register)
+- [ ] Exercise dictionary view
+- [ ] Add workout session with exercises
+- [ ] View workout history
+- [ ] Display max weight statistics per exercise
+- [ ] Responsive design (mobile + desktop)
+
+## Common Patterns for WorkoutTracker
+
+### 1. Display Workout List
+```typescript
+export function WorkoutList({ workouts }: { workouts: Workout[] }) {
+  return (
+    <div className="grid gap-4">
+      {workouts.map((workout) => (
+        <WorkoutCard key={workout.id} workout={workout} />
+      ))}
+    </div>
+  );
+}
+```
+
+### 2. Calculate Max Weight
+```typescript
+function calculateMaxWeight(exercises: Exercise[], exerciseId: number): number {
+  return Math.max(
+    ...exercises
+      .filter(e => e.id === exerciseId)
+      .map(e => e.weight),
+    0
+  );
+}
+```
+
+### 3. Protected Routes
+```typescript
+// middleware.ts
+export function middleware(request: NextRequest) {
+  const token = request.cookies.get('token');
+  if (!token) {
+    return NextResponse.redirect(new URL('/login', request.url));
+  }
+}
+```
+
+## When to Ask for Help
+- Complex TypeScript types you don't understand
+- API integration issues with Symfony backend
+- Tailwind layout problems
+- Form validation edge cases
+
+## Performance Tips (Nice to Have, Not Critical for MVP)
+- Use Next.js Image component: `<Image src="..." alt="..." width={} height={} />`
+- Implement pagination if workout list grows large
+- Add loading skeletons for better UX
+
+## Debugging Tips
+- Use `console.log()` liberally during development
+- Check Network tab in browser DevTools for API calls
+- Use React DevTools extension
+- Verify API responses match your TypeScript types
+
+## Remember
+- **MVP first** - get it working, then make it pretty
+- **Don't over-engineer** - simple solutions are fine
+- **Test in browser** - especially forms and API calls
+- **Mobile responsive** - many users will use phones
+- **Ask Cursor** - "how do I..." is always a valid question
+
+## Quick Start Commands
+```bash
+# Install Tailwind
+npm install -D tailwindcss postcss autoprefixer
+npx tailwindcss init -p
+
+# Install form libraries
+npm install react-hook-form zod @hookform/resolvers
+
+# Run dev server
+npm run dev
+```
+
+---
+Good luck with your project! 🏋️‍♂️💪
