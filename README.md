@@ -1,53 +1,87 @@
-# Symfony Docker
+# WorkoutTracker
 
-A [Docker](https://www.docker.com/)-based installer and runtime for the [Symfony](https://symfony.com) web framework,
-with [FrankenPHP](https://frankenphp.dev) and [Caddy](https://caddyserver.com/) inside!
+## Table of Contents
+- [Project Name](#project-name)
+- [Project Description](#project-description)
+- [Tech Stack](#tech-stack)
+- [Getting Started Locally](#getting-started-locally)
+- [Available Scripts](#available-scripts)
+- [Project Scope](#project-scope)
+- [Project Status](#project-status)
+- [License](#license)
 
-![CI](https://github.com/dunglas/symfony-docker/workflows/CI/badge.svg)
+## Project Name
+**WorkoutTracker**
 
-## Getting Started
+## Project Description
+WorkoutTracker is a responsive web application designed for tracking resistance training sessions. The application aims to simplify the process of recording workouts by allowing users to create sessions on-the-go, log exercises with multiple series, and visualize progress through dynamic statistical charts. Whether you are a beginner looking for a simple tracking tool or an intermediate user needing detailed insights into your training routines, WorkoutTracker provides a fast, mobile-first solution for managing your workout history.
 
-1. If not already done, [install Docker Compose](https://docs.docker.com/compose/install/) (v2.10+)
-2. Run `docker compose build --pull --no-cache` to build fresh images
-3. Run `docker compose up --wait` to set up and start a fresh Symfony project
-4. Open `https://localhost` in your favorite web browser and [accept the auto-generated TLS certificate](https://stackoverflow.com/a/15076602/1352334)
-5. Run `docker compose down --remove-orphans` to stop the Docker containers.
+## Tech Stack
+- **Backend:** Symfony 7.3 (PHP 8.4), Doctrine ORM, Nelmio CORS Bundle
+- **Frontend:** Next.js, React, TypeScript
+- **Database:** PostgreSQL
+- **API Documentation:** Swagger
+- **Deployment:** Web application (online only)
 
-## Features
+## Getting Started Locally
+Follow these steps to set up the project on your local machine:
 
-- Production, development and CI ready
-- Just 1 service by default
-- Blazing-fast performance thanks to [the worker mode of FrankenPHP](https://github.com/dunglas/frankenphp/blob/main/docs/worker.md) (automatically enabled in prod mode)
-- [Installation of extra Docker Compose services](docs/extra-services.md) with Symfony Flex
-- Automatic HTTPS (in dev and prod)
-- HTTP/3 and [Early Hints](https://symfony.com/blog/new-in-symfony-6-3-early-hints) support
-- Real-time messaging thanks to a built-in [Mercure hub](https://symfony.com/doc/current/mercure.html)
-- [Vulcain](https://vulcain.rocks) support
-- Native [XDebug](docs/xdebug.md) integration
-- **Integrated [Swagger UI](docs/swagger-api.md) for API documentation** (available at http://localhost:8081)
-- Super-readable configuration
+1. **Clone the repository**
+    ```bash
+    git clone https://github.com/your-username/WorkoutTracker.git
+    cd WorkoutTracker
+    ```
 
-**Enjoy!**
 
-## Docs
+2. **Backend Setup**
+   - Ensure you have PHP (>=8.4) installed.
+   - Install PHP dependencies using Composer:
+    ```bash
+    composer install
+     ```
+   - Configure your environment variables as needed (e.g., database settings).
 
-1. [Options available](docs/options.md)
-2. [Using Symfony Docker with an existing project](docs/existing-project.md)
-3. [Support for extra services](docs/extra-services.md)
-4. [Deploying in production](docs/production.md)
-5. [Debugging with Xdebug](docs/xdebug.md)
-6. [TLS Certificates](docs/tls.md)
-7. [Using MySQL instead of PostgreSQL](docs/mysql.md)
-8. [Using Alpine Linux instead of Debian](docs/alpine.md)
-9. [Using a Makefile](docs/makefile.md)
-10. [Updating the template](docs/updating.md)
-11. [Troubleshooting](docs/troubleshooting.md)
-12. **[API Documentation with Swagger UI](docs/swagger-api.md)** - Complete guide for API documentation
+3. **Frontend Setup**
+   - Navigate to the `frontend` folder:
+     ```bash
+     cd frontend
+     ```
+   - Install Node.js dependencies:
+     ```bash
+     npm install
+     ```
+   - Create a `.env.local` file if needed and specify relevant environment variables.
+
+
+## Available Scripts
+### Frontend (in the `frontend` directory)
+- **Development:** `npm run dev` – Starts the Next.js development server.
+- **Build:** `npm run build` – Builds the production-ready application.
+- **Start:** `npm run start` – Starts the Next.js production server.
+- **Lint:** `npm run lint` – Runs ESLint on the codebase.
+
+### Backend
+- Common Symfony console commands can be run via:
+  ```bash
+  php bin/console <command>
+  ```
+- Clear the cache:
+  ```bash
+  php bin/console cache:clear
+  ```
+
+## Project Scope
+The MVP of WorkoutTracker includes:
+- **User Authentication:** Registration, login, and logout functionalities with secure password hashing.
+- **Session Management:** Create, edit, and delete workout sessions with metadata (date, optional session name, and notes).
+- **Exercise and Series Tracking:** Add up to 15 exercises per session with dynamic form entries for up to 20 series per exercise.
+- **Visualizations:** Display workout statistics via charts that show the maximum weight lifted per session.
+- **Mobile-First Design:** Optimized for use on mobile devices with an intuitive and responsive UI.
+  
+Areas not covered in the MVP include advanced analytics (e.g. 1RM calculations), social sharing features, and offline capabilities.
+
+## Project Status
+The project is currently in the MVP development phase. Core functionalities are being implemented and refined based on user feedback and testing. Continuous improvements and additional features are planned for future releases.
 
 ## License
-
-Symfony Docker is available under the MIT License.
-
-## Credits
-
-Created by [Kévin Dunglas](https://dunglas.dev), co-maintained by [Maxime Helias](https://twitter.com/maxhelias) and sponsored by [Les-Tilleuls.coop](https://les-tilleuls.coop).
+This project is licensed under the **MIT License**.
