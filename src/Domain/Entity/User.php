@@ -1,0 +1,86 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Domain\Entity;
+
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
+use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Uid\Ulid;
+
+#[ORM\Entity]
+#[ORM\Table(name: 'users')]
+#[ORM\Index(name: 'idx_users_email_lower', columns: ['email'])]
+final class User
+{
+    #[ORM\Id]
+    #[ORM\Column(type: 'ulid', unique: true)]
+    private string $id;
+
+    #[ORM\Column(type: 'string', length: 255, nullable: false)]
+    private string $email;
+
+    #[ORM\Column(name: 'password_hash', type: 'string', length: 255, nullable: false)]
+    private string $passwordHash;
+
+    #[ORM\Column(name: 'created_at', type: 'datetime_immutable', nullable: false)]
+    private \DateTimeImmutable $createdAt;
+
+    #[ORM\Column(name: 'updated_at', type: 'datetime_immutable', nullable: false)]
+    private \DateTimeImmutable $updatedAt;
+
+    #[ORM\OneToMany(targetEntity: WorkoutSession::class, mappedBy: 'user', cascade: ['persist', 'remove'])]
+    private Collection $workoutSessions;
+
+    private function __construct(
+        string $email,
+        string $passwordHash
+    ) {
+        $this->id = (string) new Ulid();
+        $this->email = strtolower($email);
+        $this->passwordHash = $passwordHash;
+        $this->createdAt = new \DateTimeImmutable();
+        $this->updatedAt = new \DateTimeImmutable();
+        $this->workoutSessions = new ArrayCollection();
+    }
+
+    public static function create(string $email, string $passwordHash): self
+    {
+        return new self($email, $passwordHash);
+    }
+
+    public function getId(): string
+    {
+        return $this->id;
+    }
+
+    public function getEmail(): string
+    {
+        return $this->email;
+    }
+
+    public function getPasswordHash(): string
+    {
+        return $this->passwordHash;
+    }
+
+    public function getCreatedAt(): \DateTimeImmutable
+    {
+        return $this->createdAt;
+    }
+
+    public function getUpdatedAt(): \DateTimeImmutable
+    {
+        return $this->updatedAt;
+    }
+
+    /**
+     * @return Collection<int, WorkoutSession>
+     */
+    public function getWorkoutSessions(): Collection
+    {
+        return $this->workoutSessions;
+    }
+}
+
