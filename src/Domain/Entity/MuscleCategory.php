@@ -13,7 +13,7 @@ use Symfony\Component\Uid\Ulid;
 #[ORM\Table(name: 'muscle_categories')]
 #[ORM\UniqueConstraint(name: 'idx_muscle_categories_name_pl', columns: ['name_pl'])]
 #[ORM\UniqueConstraint(name: 'idx_muscle_categories_name_en', columns: ['name_en'])]
-final readonly class MuscleCategory
+final class MuscleCategory
 {
     #[ORM\Id]
     #[ORM\Column(type: 'ulid', unique: true)]

@@ -7,12 +7,14 @@ namespace App\Domain\Entity;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
+use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Uid\Ulid;
 
 #[ORM\Entity]
 #[ORM\Table(name: 'users')]
 #[ORM\Index(name: 'idx_users_email_lower', columns: ['email'])]
-final class User
+final class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
     #[ORM\Column(type: 'ulid', unique: true)]
@@ -35,19 +37,42 @@ final class User
 
     private function __construct(
         string $email,
-        string $passwordHash
     ) {
         $this->id = (string) new Ulid();
         $this->email = strtolower($email);
-        $this->passwordHash = $passwordHash;
         $this->createdAt = new \DateTimeImmutable();
         $this->updatedAt = new \DateTimeImmutable();
         $this->workoutSessions = new ArrayCollection();
     }
 
-    public static function create(string $email, string $passwordHash): self
+    public static function create(string $email): self
     {
-        return new self($email, $passwordHash);
+        return new self($email);
+    }
+
+    public function setPasswordHash(string $passwordHash): void
+    {
+        $this->passwordHash = $passwordHash;
+    }
+
+    public function getRoles(): array
+    {
+        return ['ROLE_USER'];
+    }
+
+    public function eraseCredentials(): void
+    {
+        // TODO: Implement eraseCredentials() method.
+    }
+
+    public function getUserIdentifier(): string
+    {
+        return $this->email;
+    }
+
+    public function getPassword(): ?string
+    {
+        return $this->passwordHash;
     }
 
     public function getId(): string

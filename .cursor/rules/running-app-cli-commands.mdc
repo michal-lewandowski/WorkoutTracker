@@ -1,0 +1,10 @@
+---
+alwaysApply: true
+---
+# Running commands in local environment
+
+### Runing symfony commands / linters / tests 
+In order to run symfony cli commands / linters / tests commands you have to remember that this is dockerized app.So each command should be run inside container like this: 
+```bash
+docker exec workouttracker-php-1 [command]
+```

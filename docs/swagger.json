@@ -1,48 +1,96 @@
 {
   "openapi": "3.0.3",
   "info": {
-    "title": "Symfony API Documentation",
-    "description": "Dokumentacja API dla aplikacji Symfony",
-    "version": "1.0.0",
+    "title": "WorkoutTracker API",
+    "description": "REST API for WorkoutTracker - a workout tracking application for resistance training. Built with Symfony 7.3 backend and Next.js frontend.",
+    "version": "1.1.0",
     "contact": {
-      "name": "Twoja nazwa",
-      "email": "twoj@email.com"
+      "name": "WorkoutTracker Team",
+      "email": "contact@workouttracker.app"
+    },
+    "license": {
+      "name": "MIT",
+      "url": "https://opensource.org/licenses/MIT"
     }
   },
   "servers": [
     {
-      "url": "https://localhost",
-      "description": "Serwer deweloperski HTTPS"
+      "url": "https://localhost/api/v1",
+      "description": "Local development (HTTPS)"
     },
     {
-      "url": "http://localhost",
-      "description": "Development HTTP"
+      "url": "http://localhost/api/v1",
+      "description": "Local development (HTTP)"
+    },
+    {
+      "url": "https://api.workouttracker.app/api/v1",
+      "description": "Production server"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Authentication",
+      "description": "User authentication and authorization"
+    },
+    {
+      "name": "Muscle Categories",
+      "description": "Dictionary of muscle categories"
+    },
+    {
+      "name": "Exercises",
+      "description": "Dictionary of exercises"
+    },
+    {
+      "name": "Workout Sessions",
+      "description": "User workout sessions"
+    },
+    {
+      "name": "Workout Exercises",
+      "description": "Exercises within workout sessions"
+    },
+    {
+      "name": "Exercise Sets",
+      "description": "Sets of repetitions for exercises"
+    },
+    {
+      "name": "Statistics",
+      "description": "Workout progress statistics"
     }
   ],
   "paths": {
-    "/api/health": {
-      "get": {
-        "summary": "Sprawdź status aplikacji",
-        "description": "Endpoint do sprawdzania czy aplikacja działa poprawnie",
-        "tags": ["Health Check"],
+    "/auth/register": {
+      "post": {
+        "tags": ["Authentication"],
+        "summary": "Register a new user account",
+        "description": "Creates a new user account with email and password",
+        "operationId": "registerUser",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterRequest"
+              }
+            }
+          }
+        },
         "responses": {
-          "200": {
-            "description": "Aplikacja działa poprawnie",
+          "201": {
+            "description": "User successfully registered",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "status": {
-                      "type": "string",
-                      "example": "OK"
-                    },
-                    "timestamp": {
-                      "type": "string",
-                      "format": "date-time",
-                      "example": "2025-09-30T12:00:00Z"
-                    }
-                  }
+                  "$ref": "#/components/schemas/AuthResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationError"
                 }
               }
             }
@@ -50,87 +98,35 @@
         }
       }
     },
-    "/api/users": {
-      "get": {
-        "summary": "Pobierz listę użytkowników",
-        "description": "Zwraca listę wszystkich użytkowników",
-        "tags": ["Users"],
-        "parameters": [
-          {
-            "name": "page",
-            "in": "query",
-            "description": "Numer strony",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "minimum": 1,
-              "default": 1
-            }
-          },
-          {
-            "name": "limit",
-            "in": "query",
-            "description": "Liczba elementów na stronie",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "minimum": 1,
-              "maximum": 100,
-              "default": 10
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Lista użytkowników",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "users": {
-                      "type": "array",
-                      "items": {
-                        "$ref": "#/components/schemas/User"
-                      }
-                    },
-                    "pagination": {
-                      "$ref": "#/components/schemas/Pagination"
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      },
+    "/auth/login": {
       "post": {
-        "summary": "Utwórz nowego użytkownika",
-        "description": "Tworzy nowego użytkownika w systemie",
-        "tags": ["Users"],
+        "tags": ["Authentication"],
+        "summary": "Authenticate user",
+        "description": "Login with email and password to receive JWT token",
+        "operationId": "loginUser",
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/UserCreate"
+                "$ref": "#/components/schemas/LoginRequest"
               }
             }
           }
         },
         "responses": {
-          "201": {
-            "description": "Użytkownik został utworzony",
+          "200": {
+            "description": "Successfully authenticated",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/User"
+                  "$ref": "#/components/schemas/AuthResponse"
                 }
               }
             }
           },
-          "400": {
-            "description": "Błędne dane wejściowe",
+          "401": {
+            "description": "Invalid credentials",
             "content": {
               "application/json": {
                 "schema": {
@@ -142,26 +138,20 @@
         }
       }
     },
-    "/api/users/{id}": {
+    "/auth/me": {
       "get": {
-        "summary": "Pobierz użytkownika po ID",
-        "description": "Zwraca szczegóły użytkownika o podanym ID",
-        "tags": ["Users"],
-        "parameters": [
+        "tags": ["Authentication"],
+        "summary": "Get current user profile",
+        "description": "Returns authenticated user's profile information",
+        "operationId": "getCurrentUser",
+        "security": [
           {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "description": "ID użytkownika",
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
+            "bearerAuth": []
           }
         ],
         "responses": {
           "200": {
-            "description": "Szczegóły użytkownika",
+            "description": "Current user profile",
             "content": {
               "application/json": {
                 "schema": {
@@ -170,8 +160,365 @@
               }
             }
           },
+          "401": {
+            "description": "Invalid or expired token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/muscle-categories": {
+      "get": {
+        "tags": ["Muscle Categories"],
+        "summary": "Get all muscle categories",
+        "description": "Returns list of all 6 muscle categories",
+        "operationId": "getMuscleCategories",
+          "security": [
+              {
+                  "bearerAuth": []
+              }
+          ],
+        "responses": {
+          "200": {
+            "description": "List of muscle categories",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MuscleCategory"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/exercises": {
+      "get": {
+        "tags": ["Exercises"],
+        "summary": "Get all exercises",
+        "description": "Returns list of exercises with optional filtering",
+        "operationId": "getExercises",
+          "security": [
+              {
+                  "bearerAuth": []
+              }
+          ],
+        "parameters": [
+          {
+            "name": "muscleCategoryId",
+            "in": "query",
+            "description": "Filter by muscle category ID",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "ulid"
+            }
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "description": "Search by exercise name (partial match, case-insensitive)",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "lang",
+            "in": "query",
+            "description": "Language for exercise names",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": ["pl", "en"],
+              "default": "pl"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of exercises",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Exercise"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/exercises/{id}": {
+      "get": {
+        "tags": ["Exercises"],
+        "summary": "Get exercise by ID",
+        "description": "Returns a single exercise",
+        "operationId": "getExerciseById",
+          "security": [
+              {
+                  "bearerAuth": []
+              }
+          ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Exercise ULID",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "ulid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Exercise details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Exercise"
+                }
+              }
+            }
+          },
           "404": {
-            "description": "Użytkownik nie został znaleziony",
+            "description": "Exercise not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/workout-sessions": {
+      "get": {
+        "tags": ["Workout Sessions"],
+        "summary": "Get all workout sessions",
+        "description": "Returns paginated list of user's workout sessions",
+        "operationId": "getWorkoutSessions",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Number of results per page",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 50
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "Pagination offset",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0
+            }
+          },
+          {
+            "name": "dateFrom",
+            "in": "query",
+            "description": "Filter sessions from date",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "dateTo",
+            "in": "query",
+            "description": "Filter sessions to date",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "sortBy",
+            "in": "query",
+            "description": "Sort field",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": ["date", "createdAt"],
+              "default": "date"
+            }
+          },
+          {
+            "name": "sortOrder",
+            "in": "query",
+            "description": "Sort order",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": ["asc", "desc"],
+              "default": "desc"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of workout sessions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkoutSessionList"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["Workout Sessions"],
+        "summary": "Create new workout session",
+        "description": "Creates an empty workout session (exercises added later)",
+        "operationId": "createWorkoutSession",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateWorkoutSessionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Workout session created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkoutSessionDetail"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/workout-sessions/{id}": {
+      "get": {
+        "tags": ["Workout Sessions"],
+        "summary": "Get workout session by ID",
+        "description": "Returns detailed workout session with all exercises and sets",
+        "operationId": "getWorkoutSessionById",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Workout session ULID",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "ulid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Workout session details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkoutSessionDetail"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Session not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Access denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
             "content": {
               "application/json": {
                 "schema": {
@@ -183,18 +530,24 @@
         }
       },
       "put": {
-        "summary": "Zaktualizuj użytkownika",
-        "description": "Aktualizuje dane użytkownika o podanym ID",
-        "tags": ["Users"],
+        "tags": ["Workout Sessions"],
+        "summary": "Update workout session metadata",
+        "description": "Updates session metadata only (date, name, notes)",
+        "operationId": "updateWorkoutSession",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
         "parameters": [
           {
             "name": "id",
             "in": "path",
+            "description": "Workout session ULID",
             "required": true,
-            "description": "ID użytkownika",
             "schema": {
-              "type": "integer",
-              "format": "int64"
+              "type": "string",
+              "format": "ulid"
             }
           }
         ],
@@ -203,24 +556,54 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/UserUpdate"
+                "$ref": "#/components/schemas/UpdateWorkoutSessionRequest"
               }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "Użytkownik został zaktualizowany",
+            "description": "Workout session updated",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/User"
+                  "$ref": "#/components/schemas/WorkoutSessionDetail"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationError"
                 }
               }
             }
           },
           "404": {
-            "description": "Użytkownik nie został znaleziony",
+            "description": "Session not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Access denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
             "content": {
               "application/json": {
                 "schema": {
@@ -232,27 +615,617 @@
         }
       },
       "delete": {
-        "summary": "Usuń użytkownika",
-        "description": "Usuwa użytkownika o podanym ID",
-        "tags": ["Users"],
+        "tags": ["Workout Sessions"],
+        "summary": "Delete workout session",
+        "description": "Soft deletes a workout session",
+        "operationId": "deleteWorkoutSession",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
         "parameters": [
           {
             "name": "id",
             "in": "path",
+            "description": "Workout session ULID",
             "required": true,
-            "description": "ID użytkownika",
             "schema": {
-              "type": "integer",
-              "format": "int64"
+              "type": "string",
+              "format": "ulid"
             }
           }
         ],
         "responses": {
           "204": {
-            "description": "Użytkownik został usunięty"
+            "description": "Workout session deleted"
           },
           "404": {
-            "description": "Użytkownik nie został znaleziony",
+            "description": "Session not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Access denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/workout-exercises": {
+      "post": {
+        "tags": ["Workout Exercises"],
+        "summary": "Add exercise to workout session",
+        "description": "Adds an exercise to an existing workout session",
+        "operationId": "createWorkoutExercise",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateWorkoutExerciseRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Exercise added to session",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkoutExercise"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Session or exercise not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Access denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/workout-exercises/{id}": {
+      "put": {
+        "tags": ["Workout Exercises"],
+        "summary": "Update workout exercise sets",
+        "description": "Replaces all sets for a workout exercise",
+        "operationId": "updateWorkoutExercise",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Workout exercise ULID",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "ulid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateWorkoutExerciseRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Exercise sets updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkoutExercise"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Workout exercise not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Access denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Workout Exercises"],
+        "summary": "Delete workout exercise",
+        "description": "Removes an exercise from workout session",
+        "operationId": "deleteWorkoutExercise",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Workout exercise ULID",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "ulid"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Exercise removed from session"
+          },
+          "404": {
+            "description": "Workout exercise not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Access denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/exercise-sets": {
+      "post": {
+        "tags": ["Exercise Sets"],
+        "summary": "Add set to workout exercise",
+        "description": "Adds a new set group to an existing workout exercise",
+        "operationId": "createExerciseSet",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateExerciseSetRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Set added to exercise",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExerciseSet"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Workout exercise not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Access denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/exercise-sets/{id}": {
+      "put": {
+        "tags": ["Exercise Sets"],
+        "summary": "Update exercise set",
+        "description": "Updates an existing set group",
+        "operationId": "updateExerciseSet",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Exercise set ULID",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "ulid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateExerciseSetRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Set updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExerciseSet"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Exercise set not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Access denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Exercise Sets"],
+        "summary": "Delete exercise set",
+        "description": "Removes a set group from exercise",
+        "operationId": "deleteExerciseSet",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Exercise set ULID",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "ulid"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Set removed"
+          },
+          "404": {
+            "description": "Exercise set not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Access denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/statistics/exercise/{exerciseId}": {
+      "get": {
+        "tags": ["Statistics"],
+        "summary": "Get exercise progress statistics",
+        "description": "Returns max weight per session over time for specific exercise",
+        "operationId": "getExerciseStatistics",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "exerciseId",
+            "in": "path",
+            "description": "Exercise ULID",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "ulid"
+            }
+          },
+          {
+            "name": "dateFrom",
+            "in": "query",
+            "description": "Start date for statistics",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "dateTo",
+            "in": "query",
+            "description": "End date for statistics",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Max number of data points",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000,
+              "default": 100
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Exercise progress statistics",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExerciseStatistics"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Exercise not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/statistics/dashboard": {
+      "get": {
+        "tags": ["Statistics"],
+        "summary": "Get dashboard statistics",
+        "description": "Returns aggregated statistics for dashboard display",
+        "operationId": "getDashboardStatistics",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Dashboard statistics",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DashboardStatistics"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
             "content": {
               "application/json": {
                 "schema": {
@@ -266,121 +1239,697 @@
     }
   },
   "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "JWT Authorization header using the Bearer scheme. Enter your JWT token in the format: Bearer {token}"
+      }
+    },
     "schemas": {
-      "User": {
+      "RegisterRequest": {
         "type": "object",
-        "properties": {
-          "id": {
-            "type": "integer",
-            "format": "int64",
-            "example": 1
-          },
-          "email": {
-            "type": "string",
-            "format": "email",
-            "example": "jan.kowalski@example.com"
-          },
-          "name": {
-            "type": "string",
-            "example": "Jan Kowalski"
-          },
-          "created_at": {
-            "type": "string",
-            "format": "date-time",
-            "example": "2025-09-30T12:00:00Z"
-          },
-          "updated_at": {
-            "type": "string",
-            "format": "date-time",
-            "example": "2025-09-30T12:00:00Z"
-          }
-        },
-        "required": ["id", "email", "name", "created_at", "updated_at"]
-      },
-      "UserCreate": {
-        "type": "object",
+        "required": ["email", "password", "passwordConfirmation"],
         "properties": {
           "email": {
             "type": "string",
             "format": "email",
-            "example": "jan.kowalski@example.com"
-          },
-          "name": {
-            "type": "string",
-            "example": "Jan Kowalski"
+            "maxLength": 255,
+            "example": "user@example.com",
+            "description": "User email address (unique, case-insensitive)"
           },
           "password": {
             "type": "string",
             "minLength": 8,
-            "example": "bezpieczne_haslo123"
+            "pattern": "^(?=.*[A-Z])(?=.*\\d).+$",
+            "example": "SecurePass123",
+            "description": "Password (min 8 chars, at least 1 uppercase letter, 1 digit)"
+          },
+          "passwordConfirmation": {
+            "type": "string",
+            "example": "SecurePass123",
+            "description": "Password confirmation (must match password)"
           }
-        },
-        "required": ["email", "name", "password"]
+        }
       },
-      "UserUpdate": {
+      "LoginRequest": {
         "type": "object",
+        "required": ["email", "password"],
         "properties": {
           "email": {
             "type": "string",
             "format": "email",
-            "example": "jan.kowalski@example.com"
+            "example": "user@example.com"
           },
-          "name": {
+          "password": {
             "type": "string",
-            "example": "Jan Kowalski"
+            "example": "SecurePass123"
           }
         }
       },
-      "Pagination": {
+      "AuthResponse": {
         "type": "object",
         "properties": {
-          "current_page": {
-            "type": "integer",
-            "example": 1
+          "user": {
+            "$ref": "#/components/schemas/User"
           },
-          "per_page": {
+          "token": {
+            "type": "string",
+            "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+            "description": "JWT access token (valid for 24 hours)"
+          }
+        }
+      },
+      "User": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "ulid",
+            "example": "01ARZ3NDEKTSV4RRFFQ69G5FAV",
+            "description": "User ULID"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "example": "user@example.com"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2025-10-11T10:30:00Z",
+            "description": "Account creation timestamp (UTC)"
+          }
+        }
+      },
+      "MuscleCategory": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "ulid",
+            "example": "01ARZ3NDEKTSV4RRFFQ69G5FAV"
+          },
+          "namePl": {
+            "type": "string",
+            "example": "Klatka piersiowa",
+            "description": "Polish name"
+          },
+          "nameEn": {
+            "type": "string",
+            "example": "Chest",
+            "description": "English name"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2025-10-10T00:00:00Z"
+          }
+        }
+      },
+      "Exercise": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "ulid",
+            "example": "01ARZ3NDEKTSV4RRFFQ69G5FAV"
+          },
+          "name": {
+            "type": "string",
+            "example": "Wyciskanie sztangi leżąc",
+            "description": "Polish name"
+          },
+          "nameEn": {
+            "type": "string",
+            "example": "Barbell Bench Press",
+            "description": "English name",
+            "nullable": true
+          },
+          "muscleCategoryId": {
+            "type": "string",
+            "format": "ulid",
+            "example": "01ARZ3NDEKTSV4RRFFQ69G5FAV"
+          },
+          "muscleCategory": {
+            "$ref": "#/components/schemas/MuscleCategory"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2025-10-10T00:00:00Z"
+          }
+        }
+      },
+      "CreateWorkoutSessionRequest": {
+        "type": "object",
+        "required": ["date"],
+        "properties": {
+          "date": {
+            "type": "string",
+            "format": "date",
+            "example": "2025-10-11",
+            "description": "Session date (not future date)"
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 255,
+            "example": "Trening A - FBW",
+            "nullable": true
+          },
+          "notes": {
+            "type": "string",
+            "example": "Świetny trening!",
+            "nullable": true
+          }
+        }
+      },
+      "UpdateWorkoutSessionRequest": {
+        "type": "object",
+        "required": ["date", "name", "notes"],
+        "properties": {
+          "date": {
+            "type": "string",
+            "format": "date",
+            "example": "2025-10-12"
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 255,
+            "example": "Updated name",
+            "nullable": true
+          },
+          "notes": {
+            "type": "string",
+            "example": "Updated notes",
+            "nullable": true
+          }
+        }
+      },
+      "WorkoutSessionSummary": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "ulid",
+            "example": "01ARZ3NDEKTSV4RRFFQ69G5FAV"
+          },
+          "userId": {
+            "type": "string",
+            "format": "ulid",
+            "example": "01ARZ3NDEKTSV4RRFFQ69G5FAV"
+          },
+          "date": {
+            "type": "string",
+            "format": "date",
+            "example": "2025-10-11"
+          },
+          "name": {
+            "type": "string",
+            "example": "Trening A - FBW",
+            "nullable": true
+          },
+          "notes": {
+            "type": "string",
+            "example": "Świetny trening!",
+            "nullable": true
+          },
+          "exerciseCount": {
+            "type": "integer",
+            "example": 8,
+            "description": "Number of exercises in session"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2025-10-11T10:30:00Z"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2025-10-11T10:30:00Z"
+          }
+        }
+      },
+      "WorkoutSessionDetail": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "ulid",
+            "example": "01ARZ3NDEKTSV4RRFFQ69G5FAV"
+          },
+          "userId": {
+            "type": "string",
+            "format": "ulid",
+            "example": "01ARZ3NDEKTSV4RRFFQ69G5FAV"
+          },
+          "date": {
+            "type": "string",
+            "format": "date",
+            "example": "2025-10-11"
+          },
+          "name": {
+            "type": "string",
+            "example": "Trening A - FBW",
+            "nullable": true
+          },
+          "notes": {
+            "type": "string",
+            "example": "Świetny trening!",
+            "nullable": true
+          },
+          "workoutExercises": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WorkoutExercise"
+            }
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2025-10-11T10:30:00Z"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2025-10-11T10:45:00Z"
+          }
+        }
+      },
+      "WorkoutSessionList": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WorkoutSessionSummary"
+            }
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PaginationMeta"
+          }
+        }
+      },
+      "PaginationMeta": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "type": "integer",
+            "example": 45,
+            "description": "Total number of items"
+          },
+          "limit": {
+            "type": "integer",
+            "example": 50,
+            "description": "Items per page"
+          },
+          "offset": {
+            "type": "integer",
+            "example": 0,
+            "description": "Current offset"
+          }
+        }
+      },
+      "CreateWorkoutExerciseRequest": {
+        "type": "object",
+        "required": ["workoutSessionId", "exerciseId"],
+        "properties": {
+          "workoutSessionId": {
+            "type": "string",
+            "format": "ulid",
+            "example": "01ARZ3NDEKTSV4RRFFQ69G5FAV"
+          },
+          "exerciseId": {
+            "type": "string",
+            "format": "ulid",
+            "example": "01ARZ3NDEKTSV4RRFFQ69G5FB1"
+          },
+          "sets": {
+            "type": "array",
+            "maxItems": 20,
+            "items": {
+              "$ref": "#/components/schemas/SetInput"
+            },
+            "description": "Optional - sets can be added later"
+          }
+        }
+      },
+      "UpdateWorkoutExerciseRequest": {
+        "type": "object",
+        "required": ["sets"],
+        "properties": {
+          "sets": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 20,
+            "items": {
+              "$ref": "#/components/schemas/SetInput"
+            }
+          }
+        }
+      },
+      "WorkoutExercise": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "ulid",
+            "example": "01ARZ3NDEKTSV4RRFFQ69G5FB0"
+          },
+          "workoutSessionId": {
+            "type": "string",
+            "format": "ulid",
+            "example": "01ARZ3NDEKTSV4RRFFQ69G5FAV"
+          },
+          "exerciseId": {
+            "type": "string",
+            "format": "ulid",
+            "example": "01ARZ3NDEKTSV4RRFFQ69G5FB1"
+          },
+          "exercise": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "ulid"
+              },
+              "name": {
+                "type": "string",
+                "example": "Wyciskanie sztangi leżąc"
+              },
+              "nameEn": {
+                "type": "string",
+                "example": "Barbell Bench Press"
+              },
+              "muscleCategoryId": {
+                "type": "string",
+                "format": "ulid"
+              }
+            }
+          },
+          "sets": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExerciseSet"
+            }
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2025-10-11T10:35:00Z"
+          }
+        }
+      },
+      "SetInput": {
+        "type": "object",
+        "required": ["setsCount", "reps", "weightKg"],
+        "properties": {
+          "setsCount": {
+            "type": "integer",
+            "minimum": 1,
+            "example": 3,
+            "description": "Number of sets in group (e.g., 3 in 3x10@70kg)"
+          },
+          "reps": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100,
+            "example": 10,
+            "description": "Number of repetitions"
+          },
+          "weightKg": {
+            "type": "number",
+            "format": "float",
+            "minimum": 0,
+            "maximum": 500,
+            "example": 70.0,
+            "description": "Weight in kilograms (stored as grams in DB)"
+          }
+        }
+      },
+      "CreateExerciseSetRequest": {
+        "type": "object",
+        "required": ["workoutExerciseId", "setsCount", "reps", "weightKg"],
+        "properties": {
+          "workoutExerciseId": {
+            "type": "string",
+            "format": "ulid",
+            "example": "01ARZ3NDEKTSV4RRFFQ69G5FB0"
+          },
+          "setsCount": {
+            "type": "integer",
+            "minimum": 1,
+            "example": 3
+          },
+          "reps": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100,
+            "example": 10
+          },
+          "weightKg": {
+            "type": "number",
+            "format": "float",
+            "minimum": 0,
+            "maximum": 500,
+            "example": 70.0
+          }
+        }
+      },
+      "UpdateExerciseSetRequest": {
+        "type": "object",
+        "required": ["setsCount", "reps", "weightKg"],
+        "properties": {
+          "setsCount": {
+            "type": "integer",
+            "minimum": 1,
+            "example": 4
+          },
+          "reps": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100,
+            "example": 12
+          },
+          "weightKg": {
+            "type": "number",
+            "format": "float",
+            "minimum": 0,
+            "maximum": 500,
+            "example": 75.0
+          }
+        }
+      },
+      "ExerciseSet": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "ulid",
+            "example": "01ARZ3NDEKTSV4RRFFQ69G5FB2"
+          },
+          "workoutExerciseId": {
+            "type": "string",
+            "format": "ulid",
+            "example": "01ARZ3NDEKTSV4RRFFQ69G5FB0"
+          },
+          "setsCount": {
+            "type": "integer",
+            "example": 3
+          },
+          "reps": {
             "type": "integer",
             "example": 10
           },
-          "total": {
-            "type": "integer",
-            "example": 50
+          "weightKg": {
+            "type": "number",
+            "format": "float",
+            "example": 70.0
           },
-          "total_pages": {
-            "type": "integer",
-            "example": 5
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2025-10-11T10:35:00Z"
           }
-        },
-        "required": ["current_page", "per_page", "total", "total_pages"]
+        }
+      },
+      "ExerciseStatistics": {
+        "type": "object",
+        "properties": {
+          "exerciseId": {
+            "type": "string",
+            "format": "ulid",
+            "example": "01ARZ3NDEKTSV4RRFFQ69G5FB1"
+          },
+          "exercise": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "ulid"
+              },
+              "name": {
+                "type": "string",
+                "example": "Wyciskanie sztangi leżąc"
+              },
+              "nameEn": {
+                "type": "string",
+                "example": "Barbell Bench Press"
+              }
+            }
+          },
+          "dataPoints": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "date": {
+                  "type": "string",
+                  "format": "date",
+                  "example": "2025-09-15"
+                },
+                "sessionId": {
+                  "type": "string",
+                  "format": "ulid",
+                  "example": "01ARZ3NDEKTSV4RRFFQ69G5FAV"
+                },
+                "maxWeightKg": {
+                  "type": "number",
+                  "format": "float",
+                  "example": 70.0
+                }
+              }
+            }
+          },
+          "summary": {
+            "type": "object",
+            "nullable": true,
+            "properties": {
+              "totalSessions": {
+                "type": "integer",
+                "example": 3
+              },
+              "personalRecord": {
+                "type": "number",
+                "format": "float",
+                "example": 75.0
+              },
+              "prDate": {
+                "type": "string",
+                "format": "date",
+                "example": "2025-09-22"
+              },
+              "firstWeight": {
+                "type": "number",
+                "format": "float",
+                "example": 70.0
+              },
+              "latestWeight": {
+                "type": "number",
+                "format": "float",
+                "example": 75.0
+              },
+              "progressPercentage": {
+                "type": "number",
+                "format": "float",
+                "example": 7.14
+              }
+            }
+          }
+        }
+      },
+      "DashboardStatistics": {
+        "type": "object",
+        "properties": {
+          "totalSessions": {
+            "type": "integer",
+            "example": 45
+          },
+          "totalExercises": {
+            "type": "integer",
+            "example": 360
+          },
+          "totalSets": {
+            "type": "integer",
+            "example": 1440
+          },
+          "recentActivity": {
+            "type": "object",
+            "properties": {
+              "last7Days": {
+                "type": "integer",
+                "example": 3
+              },
+              "last30Days": {
+                "type": "integer",
+                "example": 12
+              }
+            }
+          },
+          "topExercises": {
+            "type": "array",
+            "maxItems": 5,
+            "items": {
+              "type": "object",
+              "properties": {
+                "exerciseId": {
+                  "type": "string",
+                  "format": "ulid"
+                },
+                "exerciseName": {
+                  "type": "string",
+                  "example": "Wyciskanie sztangi leżąc"
+                },
+                "timesPerformed": {
+                  "type": "integer",
+                  "example": 15
+                },
+                "personalRecord": {
+                  "type": "number",
+                  "format": "float",
+                  "example": 80.0
+                }
+              }
+            }
+          }
+        }
       },
       "Error": {
         "type": "object",
         "properties": {
-          "error": {
-            "type": "string",
-            "example": "Wystąpił błąd"
-          },
           "message": {
             "type": "string",
-            "example": "Szczegółowy opis błędu"
-          },
-          "code": {
-            "type": "integer",
-            "example": 400
+            "example": "Resource not found",
+            "description": "Human-readable error message (Polish in MVP)"
           }
-        },
-        "required": ["error", "message", "code"]
+        }
+      },
+      "ValidationError": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "example": "Validation failed",
+            "description": "General error message"
+          },
+          "errors": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "example": {
+              "email": ["Email is already registered"],
+              "password": ["Password must contain at least 1 uppercase letter"]
+            },
+            "description": "Field-specific validation errors"
+          }
+        }
       }
     }
-  },
-  "tags": [
-    {
-      "name": "Health Check",
-      "description": "Operacje związane ze statusem aplikacji"
-    },
-    {
-      "name": "Users",
-      "description": "Operacje związane z użytkownikami"
-    }
-  ]
+  }
 }
