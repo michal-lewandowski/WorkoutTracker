@@ -2,12 +2,24 @@
 
 declare(strict_types=1);
 
+/*
+ * This file is part of the proprietary project.
+ *
+ * This file and its contents are confidential and protected by copyright law.
+ * Unauthorized copying, distribution, or disclosure of this content
+ * is strictly prohibited without prior written consent from the author or
+ * copyright owner.
+ *
+ * For the full copyright and license information, please view the LICENSE.md
+ * file that was distributed with this source code.
+ */
+
 namespace App\Domain\Entity;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Uid\Ulid;
+use Symfony\Component\Uid\Uuid;
 
 #[ORM\Entity]
 #[ORM\Table(name: 'muscle_categories')]
@@ -16,7 +28,7 @@ use Symfony\Component\Uid\Ulid;
 final class MuscleCategory
 {
     #[ORM\Id]
-    #[ORM\Column(type: 'ulid', unique: true)]
+    #[ORM\Column(type: 'uuid', unique: true)]
     private string $id;
 
     #[ORM\Column(name: 'name_pl', type: 'string', length: 100, nullable: false)]
@@ -33,9 +45,9 @@ final class MuscleCategory
 
     private function __construct(
         string $namePl,
-        string $nameEn
+        string $nameEn,
     ) {
-        $this->id = (string) new Ulid();
+        $this->id = (string) Uuid::v4();
         $this->namePl = $namePl;
         $this->nameEn = $nameEn;
         $this->createdAt = new \DateTimeImmutable();
@@ -75,4 +87,3 @@ final class MuscleCategory
         return $this->exercises;
     }
 }
-

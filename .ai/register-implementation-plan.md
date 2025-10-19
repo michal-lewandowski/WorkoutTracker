@@ -8,7 +8,7 @@ Endpoint służy do rejestracji nowego użytkownika w systemie WorkoutTracker. P
 - Walidacja danych wejściowych (email, hasło)
 - Sprawdzenie unikalności emaila (case-insensitive)
 - Hashowanie hasła algorytmem bcrypt/argon2
-- Utworzenie encji User z automatycznym ULID
+- Utworzenie encji User z automatycznym uuid4
 - Generowanie tokenu JWT (ważność 24h)
 - Zwrot danych użytkownika + token w odpowiedzi
 
@@ -263,7 +263,7 @@ interface UserRegistrationServiceInterface
 
 **Struktura**:
 - `user` (object): Dane użytkownika
-  - `id` (string, ULID): Unikalny identyfikator użytkownika
+  - `id` (string, uuid4): Unikalny identyfikator użytkownika
   - `email` (string): Adres email (lowercase)
   - `createdAt` (string, ISO 8601): Data utworzenia konta w UTC
 - `token` (string): JWT access token (ważny 24h)
@@ -464,7 +464,7 @@ $hashedPassword = $this->passwordHasher->hashPassword($user, $plainPassword);
 
 ### 6.5 JWT Token
 
-- **Payload**: user id (ULID), email, iat (issued at), exp (expiration)
+- **Payload**: user id (uuid4), email, iat (issued at), exp (expiration)
 - **Expiration**: 24 godziny
 - **Algorithm**: RS256 lub HS256 (konfiguracja)
 - **Secret/Keys**: Przechowywane w `.env` (nigdy w repo)

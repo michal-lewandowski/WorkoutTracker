@@ -26,6 +26,15 @@ services:
     App\Domain\Repository\MuscleCategoryRepositoryInterface:
         class: App\Infrastructure\Repository\MuscleCategoryRepository
     
+    App\Domain\Repository\ExerciseRepositoryInterface:
+        class: App\Infrastructure\Repository\ExerciseRepository
+    
+    App\Domain\Repository\WorkoutSessionRepositoryInterface:
+        class: App\Infrastructure\Repository\WorkoutSessionRepository
+    
+    App\Domain\Repository\WorkoutExerciseRepositoryInterface:
+        class: App\Infrastructure\Repository\WorkoutExerciseRepository
+    
     # Service binding
     App\Domain\Service\UserRegistrationServiceInterface:
         class: App\Infrastructure\Service\Auth\UserRegistrationService

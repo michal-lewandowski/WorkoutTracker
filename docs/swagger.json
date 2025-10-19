@@ -14,17 +14,9 @@
     }
   },
   "servers": [
-    {
-      "url": "https://localhost/api/v1",
-      "description": "Local development (HTTPS)"
-    },
-    {
+      {
       "url": "http://localhost/api/v1",
       "description": "Local development (HTTP)"
-    },
-    {
-      "url": "https://api.workouttracker.app/api/v1",
-      "description": "Production server"
     }
   ],
   "tags": [
@@ -62,7 +54,7 @@
       "post": {
         "tags": ["Authentication"],
         "summary": "Register a new user account",
-        "description": "Creates a new user account with email and password",
+        "description": "Creates a new user account with username and password",
         "operationId": "registerUser",
         "requestBody": {
           "required": true,
@@ -102,7 +94,7 @@
       "post": {
         "tags": ["Authentication"],
         "summary": "Authenticate user",
-        "description": "Login with email and password to receive JWT token",
+        "description": "Login with username and password to receive JWT token",
         "operationId": "loginUser",
         "requestBody": {
           "required": true,
@@ -220,7 +212,7 @@
             "required": false,
             "schema": {
               "type": "string",
-              "format": "ulid"
+              "format": "uuid4"
             }
           },
           {
@@ -276,11 +268,11 @@
           {
             "name": "id",
             "in": "path",
-            "description": "Exercise ULID",
+            "description": "Exercise uuid4",
             "required": true,
             "schema": {
               "type": "string",
-              "format": "ulid"
+              "format": "uuid4"
             }
           }
         ],
@@ -478,11 +470,11 @@
           {
             "name": "id",
             "in": "path",
-            "description": "Workout session ULID",
+            "description": "Workout session uuid4",
             "required": true,
             "schema": {
               "type": "string",
-              "format": "ulid"
+              "format": "uuid4"
             }
           }
         ],
@@ -543,11 +535,11 @@
           {
             "name": "id",
             "in": "path",
-            "description": "Workout session ULID",
+            "description": "Workout session uuid4",
             "required": true,
             "schema": {
               "type": "string",
-              "format": "ulid"
+              "format": "uuid4"
             }
           }
         ],
@@ -628,11 +620,11 @@
           {
             "name": "id",
             "in": "path",
-            "description": "Workout session ULID",
+            "description": "Workout session uuid4",
             "required": true,
             "schema": {
               "type": "string",
-              "format": "ulid"
+              "format": "uuid4"
             }
           }
         ],
@@ -763,11 +755,11 @@
           {
             "name": "id",
             "in": "path",
-            "description": "Workout exercise ULID",
+            "description": "Workout exercise uuid4",
             "required": true,
             "schema": {
               "type": "string",
-              "format": "ulid"
+              "format": "uuid4"
             }
           }
         ],
@@ -848,11 +840,11 @@
           {
             "name": "id",
             "in": "path",
-            "description": "Workout exercise ULID",
+            "description": "Workout exercise uuid4",
             "required": true,
             "schema": {
               "type": "string",
-              "format": "ulid"
+              "format": "uuid4"
             }
           }
         ],
@@ -862,226 +854,6 @@
           },
           "404": {
             "description": "Workout exercise not found",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Access denied",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/exercise-sets": {
-      "post": {
-        "tags": ["Exercise Sets"],
-        "summary": "Add set to workout exercise",
-        "description": "Adds a new set group to an existing workout exercise",
-        "operationId": "createExerciseSet",
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateExerciseSetRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "Set added to exercise",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ExerciseSet"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Validation failed",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ValidationError"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Workout exercise not found",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Access denied",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/exercise-sets/{id}": {
-      "put": {
-        "tags": ["Exercise Sets"],
-        "summary": "Update exercise set",
-        "description": "Updates an existing set group",
-        "operationId": "updateExerciseSet",
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "description": "Exercise set ULID",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "ulid"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateExerciseSetRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Set updated",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ExerciseSet"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Validation failed",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ValidationError"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Exercise set not found",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Access denied",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          }
-        }
-      },
-      "delete": {
-        "tags": ["Exercise Sets"],
-        "summary": "Delete exercise set",
-        "description": "Removes a set group from exercise",
-        "operationId": "deleteExerciseSet",
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "description": "Exercise set ULID",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "ulid"
-            }
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "Set removed"
-          },
-          "404": {
-            "description": "Exercise set not found",
             "content": {
               "application/json": {
                 "schema": {
@@ -1128,11 +900,11 @@
           {
             "name": "exerciseId",
             "in": "path",
-            "description": "Exercise ULID",
+            "description": "Exercise uuid4",
             "required": true,
             "schema": {
               "type": "string",
-              "format": "ulid"
+              "format": "uuid4"
             }
           },
           {
@@ -1257,7 +1029,7 @@
             "format": "email",
             "maxLength": 255,
             "example": "user@example.com",
-            "description": "User email address (unique, case-insensitive)"
+            "description": "User username address (unique, case-insensitive)"
           },
           "password": {
             "type": "string",
@@ -1275,11 +1047,11 @@
       },
       "LoginRequest": {
         "type": "object",
-        "required": ["email", "password"],
+        "required": ["username", "password"],
         "properties": {
-          "email": {
+          "username": {
             "type": "string",
-            "format": "email",
+            "format": "username",
             "example": "user@example.com"
           },
           "password": {
@@ -1306,13 +1078,13 @@
         "properties": {
           "id": {
             "type": "string",
-            "format": "ulid",
-            "example": "01ARZ3NDEKTSV4RRFFQ69G5FAV",
-            "description": "User ULID"
+            "format": "uuid4",
+            "example": "3a5b2509-e93b-4433-9520-dd51b1d6ef32",
+            "description": "User uuid4"
           },
-          "email": {
+          "username": {
             "type": "string",
-            "format": "email",
+            "format": "username",
             "example": "user@example.com"
           },
           "createdAt": {
@@ -1328,8 +1100,8 @@
         "properties": {
           "id": {
             "type": "string",
-            "format": "ulid",
-            "example": "01ARZ3NDEKTSV4RRFFQ69G5FAV"
+            "format": "uuid4",
+            "example": "3a5b2509-e93b-4433-9520-dd51b1d6ef32"
           },
           "namePl": {
             "type": "string",
@@ -1353,8 +1125,8 @@
         "properties": {
           "id": {
             "type": "string",
-            "format": "ulid",
-            "example": "01ARZ3NDEKTSV4RRFFQ69G5FAV"
+            "format": "uuid4",
+            "example": "3a5b2509-e93b-4433-9520-dd51b1d6ef32"
           },
           "name": {
             "type": "string",
@@ -1369,8 +1141,8 @@
           },
           "muscleCategoryId": {
             "type": "string",
-            "format": "ulid",
-            "example": "01ARZ3NDEKTSV4RRFFQ69G5FAV"
+            "format": "uuid4",
+            "example": "3a5b2509-e93b-4433-9520-dd51b1d6ef32"
           },
           "muscleCategory": {
             "$ref": "#/components/schemas/MuscleCategory"
@@ -1432,13 +1204,13 @@
         "properties": {
           "id": {
             "type": "string",
-            "format": "ulid",
-            "example": "01ARZ3NDEKTSV4RRFFQ69G5FAV"
+            "format": "uuid4",
+            "example": "3a5b2509-e93b-4433-9520-dd51b1d6ef32"
           },
           "userId": {
             "type": "string",
-            "format": "ulid",
-            "example": "01ARZ3NDEKTSV4RRFFQ69G5FAV"
+            "format": "uuid4",
+            "example": "3a5b2509-e93b-4433-9520-dd51b1d6ef32"
           },
           "date": {
             "type": "string",
@@ -1477,13 +1249,13 @@
         "properties": {
           "id": {
             "type": "string",
-            "format": "ulid",
-            "example": "01ARZ3NDEKTSV4RRFFQ69G5FAV"
+            "format": "uuid4",
+            "example": "3a5b2509-e93b-4433-9520-dd51b1d6ef32"
           },
           "userId": {
             "type": "string",
-            "format": "ulid",
-            "example": "01ARZ3NDEKTSV4RRFFQ69G5FAV"
+            "format": "uuid4",
+            "example": "3a5b2509-e93b-4433-9520-dd51b1d6ef32"
           },
           "date": {
             "type": "string",
@@ -1558,13 +1330,13 @@
         "properties": {
           "workoutSessionId": {
             "type": "string",
-            "format": "ulid",
-            "example": "01ARZ3NDEKTSV4RRFFQ69G5FAV"
+            "format": "uuid4",
+            "example": "3a5b2509-e93b-4433-9520-dd51b1d6ef32"
           },
           "exerciseId": {
             "type": "string",
-            "format": "ulid",
-            "example": "01ARZ3NDEKTSV4RRFFQ69G5FB1"
+            "format": "uuid4",
+            "example": "3a5b2509-e93b-4433-9520-dd51b1d6ef32"
           },
           "sets": {
             "type": "array",
@@ -1595,25 +1367,25 @@
         "properties": {
           "id": {
             "type": "string",
-            "format": "ulid",
-            "example": "01ARZ3NDEKTSV4RRFFQ69G5FB0"
+            "format": "uuid4",
+            "example": "3a5b2509-e93b-4433-9520-dd51b1d6ef32"
           },
           "workoutSessionId": {
             "type": "string",
-            "format": "ulid",
-            "example": "01ARZ3NDEKTSV4RRFFQ69G5FAV"
+            "format": "uuid4",
+            "example": "3a5b2509-e93b-4433-9520-dd51b1d6ef32"
           },
           "exerciseId": {
             "type": "string",
-            "format": "ulid",
-            "example": "01ARZ3NDEKTSV4RRFFQ69G5FB1"
+            "format": "uuid4",
+            "example": "3a5b2509-e93b-4433-9520-dd51b1d6ef32"
           },
           "exercise": {
             "type": "object",
             "properties": {
               "id": {
                 "type": "string",
-                "format": "ulid"
+                "format": "uuid4"
               },
               "name": {
                 "type": "string",
@@ -1625,7 +1397,7 @@
               },
               "muscleCategoryId": {
                 "type": "string",
-                "format": "ulid"
+                "format": "uuid4"
               }
             }
           },
@@ -1675,8 +1447,8 @@
         "properties": {
           "workoutExerciseId": {
             "type": "string",
-            "format": "ulid",
-            "example": "01ARZ3NDEKTSV4RRFFQ69G5FB0"
+            "format": "uuid4",
+            "example": "3a5b2509-e93b-4433-9520-dd51b1d6ef32"
           },
           "setsCount": {
             "type": "integer",
@@ -1727,13 +1499,13 @@
         "properties": {
           "id": {
             "type": "string",
-            "format": "ulid",
-            "example": "01ARZ3NDEKTSV4RRFFQ69G5FB2"
+            "format": "uuid4",
+            "example": "3a5b2509-e93b-4433-9520-dd51b1d6ef32"
           },
           "workoutExerciseId": {
             "type": "string",
-            "format": "ulid",
-            "example": "01ARZ3NDEKTSV4RRFFQ69G5FB0"
+            "format": "uuid4",
+            "example": "3a5b2509-e93b-4433-9520-dd51b1d6ef32"
           },
           "setsCount": {
             "type": "integer",
@@ -1760,15 +1532,15 @@
         "properties": {
           "exerciseId": {
             "type": "string",
-            "format": "ulid",
-            "example": "01ARZ3NDEKTSV4RRFFQ69G5FB1"
+            "format": "uuid4",
+            "example": "3a5b2509-e93b-4433-9520-dd51b1d6ef32"
           },
           "exercise": {
             "type": "object",
             "properties": {
               "id": {
                 "type": "string",
-                "format": "ulid"
+                "format": "uuid4"
               },
               "name": {
                 "type": "string",
@@ -1792,8 +1564,8 @@
                 },
                 "sessionId": {
                   "type": "string",
-                  "format": "ulid",
-                  "example": "01ARZ3NDEKTSV4RRFFQ69G5FAV"
+                  "format": "uuid4",
+                  "example": "3a5b2509-e93b-4433-9520-dd51b1d6ef32"
                 },
                 "maxWeightKg": {
                   "type": "number",
@@ -1876,7 +1648,7 @@
               "properties": {
                 "exerciseId": {
                   "type": "string",
-                  "format": "ulid"
+                  "format": "uuid4"
                 },
                 "exerciseName": {
                   "type": "string",
@@ -1923,7 +1695,7 @@
               }
             },
             "example": {
-              "email": ["Email is already registered"],
+              "username": ["username is already registered"],
               "password": ["Password must contain at least 1 uppercase letter"]
             },
             "description": "Field-specific validation errors"

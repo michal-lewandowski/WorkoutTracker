@@ -2,12 +2,24 @@
 
 declare(strict_types=1);
 
+/*
+ * This file is part of the proprietary project.
+ *
+ * This file and its contents are confidential and protected by copyright law.
+ * Unauthorized copying, distribution, or disclosure of this content
+ * is strictly prohibited without prior written consent from the author or
+ * copyright owner.
+ *
+ * For the full copyright and license information, please view the LICENSE.md
+ * file that was distributed with this source code.
+ */
+
 namespace App\Domain\Entity;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Uid\Ulid;
+use Symfony\Component\Uid\Uuid;
 
 #[ORM\Entity]
 #[ORM\Table(name: 'workout_exercises')]
@@ -16,7 +28,7 @@ use Symfony\Component\Uid\Ulid;
 final class WorkoutExercise
 {
     #[ORM\Id]
-    #[ORM\Column(type: 'ulid', unique: true)]
+    #[ORM\Column(type: 'uuid', unique: true)]
     private string $id;
 
     #[ORM\ManyToOne(targetEntity: WorkoutSession::class, inversedBy: 'workoutExercises')]
@@ -30,14 +42,14 @@ final class WorkoutExercise
     #[ORM\Column(name: 'created_at', type: 'datetime_immutable', nullable: false)]
     private \DateTimeImmutable $createdAt;
 
-    #[ORM\OneToMany(targetEntity: ExerciseSet::class, mappedBy: 'workoutExercise', cascade: ['persist', 'remove'])]
+    #[ORM\OneToMany(targetEntity: ExerciseSet::class, mappedBy: 'workoutExercise', cascade: ['persist', 'remove'], orphanRemoval: true)]
     private Collection $exerciseSets;
 
     private function __construct(
         WorkoutSession $workoutSession,
-        Exercise $exercise
+        Exercise $exercise,
     ) {
-        $this->id = (string) new Ulid();
+        $this->id = (string) Uuid::v4();
         $this->workoutSession = $workoutSession;
         $this->exercise = $exercise;
         $this->createdAt = new \DateTimeImmutable();
@@ -46,7 +58,7 @@ final class WorkoutExercise
 
     public static function create(
         WorkoutSession $workoutSession,
-        Exercise $exercise
+        Exercise $exercise,
     ): self {
         return new self($workoutSession, $exercise);
     }
@@ -79,4 +91,3 @@ final class WorkoutExercise
         return $this->exerciseSets;
     }
 }
-

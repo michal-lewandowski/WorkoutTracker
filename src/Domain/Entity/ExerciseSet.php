@@ -2,10 +2,22 @@
 
 declare(strict_types=1);
 
+/*
+ * This file is part of the proprietary project.
+ *
+ * This file and its contents are confidential and protected by copyright law.
+ * Unauthorized copying, distribution, or disclosure of this content
+ * is strictly prohibited without prior written consent from the author or
+ * copyright owner.
+ *
+ * For the full copyright and license information, please view the LICENSE.md
+ * file that was distributed with this source code.
+ */
+
 namespace App\Domain\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Uid\Ulid;
+use Symfony\Component\Uid\Uuid;
 
 #[ORM\Entity]
 #[ORM\Table(name: 'exercise_sets')]
@@ -13,7 +25,7 @@ use Symfony\Component\Uid\Ulid;
 final readonly class ExerciseSet
 {
     #[ORM\Id]
-    #[ORM\Column(type: 'ulid', unique: true)]
+    #[ORM\Column(type: 'uuid', unique: true)]
     private string $id;
 
     #[ORM\ManyToOne(targetEntity: WorkoutExercise::class, inversedBy: 'exerciseSets')]
@@ -36,9 +48,9 @@ final readonly class ExerciseSet
         WorkoutExercise $workoutExercise,
         int $setsCount,
         int $reps,
-        int $weightGrams
+        int $weightGrams,
     ) {
-        $this->id = (string) new Ulid();
+        $this->id = (string) Uuid::v4();
         $this->workoutExercise = $workoutExercise;
         $this->setsCount = $setsCount;
         $this->reps = $reps;
@@ -50,7 +62,7 @@ final readonly class ExerciseSet
         WorkoutExercise $workoutExercise,
         int $setsCount,
         int $reps,
-        int $weightGrams
+        int $weightGrams,
     ): self {
         return new self($workoutExercise, $setsCount, $reps, $weightGrams);
     }
@@ -90,4 +102,3 @@ final readonly class ExerciseSet
         return $this->weightGrams / 1000;
     }
 }
-

@@ -110,8 +110,8 @@ final class GetMuscleCategoriesControllerTest extends WebTestCase
             $this->assertIsString($category['nameEn']);
             $this->assertIsString($category['createdAt']);
             
-            // Sprawdź czy ID jest ULID (26 znaków)
-            $this->assertEquals(26, strlen($category['id']));
+            // Sprawdź czy ID jest UUID4 (36 znaków)
+            $this->assertEquals(36, strlen($category['id']));
             
             // Sprawdź czy nazwy nie są puste
             $this->assertNotEmpty($category['namePl']);

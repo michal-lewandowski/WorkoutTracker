@@ -72,9 +72,9 @@ final class GetCurrentUserControllerTest extends WebTestCase
 
         $this->assertSame($email, $responseData['email']);
 
-        // Verify ULID format (26 characters, Base32)
+        // Verify UUID4 format (36 characters with hyphens)
         $this->assertIsString($responseData['id']);
-        $this->assertMatchesRegularExpression('/^[0-7][0-9A-HJKMNP-TV-Z]{25}$/', $responseData['id']);
+        $this->assertMatchesRegularExpression('/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i', $responseData['id']);
 
         // Verify ISO 8601 datetime format
         $this->assertIsString($responseData['createdAt']);

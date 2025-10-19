@@ -2,6 +2,18 @@
 
 declare(strict_types=1);
 
+/*
+ * This file is part of the proprietary project.
+ *
+ * This file and its contents are confidential and protected by copyright law.
+ * Unauthorized copying, distribution, or disclosure of this content
+ * is strictly prohibited without prior written consent from the author or
+ * copyright owner.
+ *
+ * For the full copyright and license information, please view the LICENSE.md
+ * file that was distributed with this source code.
+ */
+
 namespace App\Domain\Entity;
 
 use Doctrine\Common\Collections\ArrayCollection;
@@ -9,7 +21,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
-use Symfony\Component\Uid\Ulid;
+use Symfony\Component\Uid\Uuid;
 
 #[ORM\Entity]
 #[ORM\Table(name: 'users')]
@@ -17,7 +29,7 @@ use Symfony\Component\Uid\Ulid;
 final class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
-    #[ORM\Column(type: 'ulid', unique: true)]
+    #[ORM\Column(type: 'uuid', unique: true)]
     private string $id;
 
     #[ORM\Column(type: 'string', length: 255, nullable: false)]
@@ -38,7 +50,7 @@ final class User implements UserInterface, PasswordAuthenticatedUserInterface
     private function __construct(
         string $email,
     ) {
-        $this->id = (string) new Ulid();
+        $this->id = (string) Uuid::v4();
         $this->email = strtolower($email);
         $this->createdAt = new \DateTimeImmutable();
         $this->updatedAt = new \DateTimeImmutable();
@@ -108,4 +120,3 @@ final class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->workoutSessions;
     }
 }
-

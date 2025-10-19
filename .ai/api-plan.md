@@ -204,7 +204,7 @@ Retrieve all exercises with optional filtering.
 Retrieve a single exercise by ID.
 
 **Path Parameters**:
-- `id`: Exercise ULID
+- `id`: Exercise uuid4
 
 **Success Response** (200 OK):
 ```json
@@ -283,7 +283,7 @@ Retrieve detailed workout session with all exercises and sets.
 **Headers**: `Authorization: Bearer <token>`
 
 **Path Parameters**:
-- `id`: Workout session ULID
+- `id`: Workout session uuid4
 
 **Success Response** (200 OK):
 ```json
@@ -401,7 +401,7 @@ Update workout session metadata (full replacement of metadata fields only).
 **Headers**: `Authorization: Bearer <token>`
 
 **Path Parameters**:
-- `id`: Workout session ULID
+- `id`: Workout session uuid4
 
 **Request Body**:
 ```json
@@ -453,7 +453,7 @@ Soft delete a workout session.
 **Headers**: `Authorization: Bearer <token>`
 
 **Path Parameters**:
-- `id`: Workout session ULID
+- `id`: Workout session uuid4
 
 **Success Response** (204 No Content):
 ```
@@ -506,8 +506,8 @@ Add an exercise to an existing workout session.
 ```
 
 **Validation**:
-- `workoutSessionId`: required, valid ULID, session must belong to authenticated user
-- `exerciseId`: required, valid ULID, must exist in exercises table
+- `workoutSessionId`: required, valid uuid4, session must belong to authenticated user
+- `exerciseId`: required, valid uuid4, must exist in exercises table
 - `sets`: optional, array, max 20 items
 - `sets[].setsCount`: required, integer, min 1
 - `sets[].reps`: required, integer, 1-100
@@ -571,7 +571,7 @@ Update an exercise's sets (full replacement of sets).
 **Headers**: `Authorization: Bearer <token>`
 
 **Path Parameters**:
-- `id`: Workout exercise ULID
+- `id`: Workout exercise uuid4
 
 **Request Body**:
 ```json
@@ -629,7 +629,7 @@ Remove an exercise from a workout session.
 **Headers**: `Authorization: Bearer <token>`
 
 **Path Parameters**:
-- `id`: Workout exercise ULID
+- `id`: Workout exercise uuid4
 
 **Success Response** (204 No Content):
 ```
@@ -672,7 +672,7 @@ Add a new set group to an existing workout exercise.
 ```
 
 **Validation**:
-- `workoutExerciseId`: required, valid ULID, must belong to user's session
+- `workoutExerciseId`: required, valid uuid4, must belong to user's session
 - `setsCount`: required, integer, min 1
 - `reps`: required, integer, 1-100
 - `weightKg`: required, number, 0-500
@@ -713,7 +713,7 @@ Update an existing set group.
 **Headers**: `Authorization: Bearer <token>`
 
 **Path Parameters**:
-- `id`: Exercise set ULID
+- `id`: Exercise set uuid4
 
 **Request Body**:
 ```json
@@ -751,7 +751,7 @@ Delete a set group from an exercise.
 **Headers**: `Authorization: Bearer <token>`
 
 **Path Parameters**:
-- `id`: Exercise set ULID
+- `id`: Exercise set uuid4
 
 **Success Response** (204 No Content):
 ```
@@ -772,7 +772,7 @@ Get progress statistics for a specific exercise (max weight per session over tim
 **Headers**: `Authorization: Bearer <token>`
 
 **Path Parameters**:
-- `exerciseId`: Exercise ULID
+- `exerciseId`: Exercise uuid4
 
 **Query Parameters**:
 - `dateFrom` (optional): Start date for statistics (YYYY-MM-DD)
@@ -1112,7 +1112,7 @@ All error responses follow this structure:
 ### 17.3 Numeric Formats
 - Weight: float with 1 decimal precision (e.g., 70.5)
 - Integers: standard JSON integer format
-- IDs: ULID string (26 characters)
+- IDs: uuid4 string (26 characters)
 
 ### 17.4 Null Handling
 - Optional fields can be `null`
@@ -1255,20 +1255,20 @@ Authorization: Bearer <token>
 
 | Database Field | API Field | Notes |
 |---------------|-----------|-------|
-| id | id | ULID (26 chars) |
-| user_id | userId | ULID |
+| id | id | uuid4 (26 chars) |
+| user_id | userId | uuid4 |
 | created_at | createdAt | ISO 8601 DateTime |
 | updated_at | updatedAt | ISO 8601 DateTime |
 | deleted_at | (hidden) | Not exposed in API responses |
 | deleted_by | (hidden) | Not exposed in API responses |
 | weight_grams | weightKg | Converted: grams / 1000 |
 | sets_count | setsCount | camelCase in API |
-| muscle_category_id | muscleCategoryId | Foreign key as ULID |
+| muscle_category_id | muscleCategoryId | Foreign key as uuid4 |
 | name_pl | namePl | camelCase in API |
 | name_en | nameEn | camelCase in API |
-| exercise_id | exerciseId | Foreign key as ULID |
-| workout_session_id | workoutSessionId | Foreign key as ULID (usually in nested context) |
-| workout_exercise_id | workoutExerciseId | Foreign key as ULID (usually in nested context) |
+| exercise_id | exerciseId | Foreign key as uuid4 |
+| workout_session_id | workoutSessionId | Foreign key as uuid4 (usually in nested context) |
+| workout_exercise_id | workoutExerciseId | Foreign key as uuid4 (usually in nested context) |
 
 ---
 

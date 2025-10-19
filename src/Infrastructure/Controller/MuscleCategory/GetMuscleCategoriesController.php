@@ -2,6 +2,18 @@
 
 declare(strict_types=1);
 
+/*
+ * This file is part of the proprietary project.
+ *
+ * This file and its contents are confidential and protected by copyright law.
+ * Unauthorized copying, distribution, or disclosure of this content
+ * is strictly prohibited without prior written consent from the author or
+ * copyright owner.
+ *
+ * For the full copyright and license information, please view the LICENSE.md
+ * file that was distributed with this source code.
+ */
+
 namespace App\Infrastructure\Controller\MuscleCategory;
 
 use App\Domain\Repository\MuscleCategoryRepositoryInterface;
@@ -20,19 +32,20 @@ final class GetMuscleCategoriesController extends AbstractController
     public function __construct(
         private readonly MuscleCategoryRepositoryInterface $muscleCategoryRepository,
         private readonly LoggerInterface $logger,
-    ) {}
+    ) {
+    }
 
     public function __invoke(): JsonResponse
     {
         try {
             $muscleCategories = $this->muscleCategoryRepository->findAll();
-            
+
             if (empty($muscleCategories)) {
                 $this->logger->warning('No muscle categories found in database');
             }
-            
+
             $muscleCategoryDtos = array_map(
-                fn($category) => MuscleCategoryDto::fromEntity($category),
+                fn ($category) => MuscleCategoryDto::fromEntity($category),
                 $muscleCategories
             );
 
@@ -42,7 +55,7 @@ final class GetMuscleCategoriesController extends AbstractController
                 'exception' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
-            
+
             return $this->json([
                 'error' => 'Service temporarily unavailable',
                 'code' => 500,
@@ -52,7 +65,7 @@ final class GetMuscleCategoriesController extends AbstractController
                 'exception' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
-            
+
             return $this->json([
                 'error' => 'An error occurred while processing your request',
                 'code' => 500,
@@ -62,7 +75,7 @@ final class GetMuscleCategoriesController extends AbstractController
                 'exception' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
-            
+
             return $this->json([
                 'error' => 'An unexpected error occurred',
                 'code' => 500,
@@ -70,4 +83,3 @@ final class GetMuscleCategoriesController extends AbstractController
         }
     }
 }
-

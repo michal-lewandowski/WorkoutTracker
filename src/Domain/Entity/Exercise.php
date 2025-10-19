@@ -2,21 +2,33 @@
 
 declare(strict_types=1);
 
+/*
+ * This file is part of the proprietary project.
+ *
+ * This file and its contents are confidential and protected by copyright law.
+ * Unauthorized copying, distribution, or disclosure of this content
+ * is strictly prohibited without prior written consent from the author or
+ * copyright owner.
+ *
+ * For the full copyright and license information, please view the LICENSE.md
+ * file that was distributed with this source code.
+ */
+
 namespace App\Domain\Entity;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Uid\Ulid;
+use Symfony\Component\Uid\Uuid;
 
 #[ORM\Entity]
 #[ORM\Table(name: 'exercises')]
 #[ORM\UniqueConstraint(name: 'idx_exercises_name', columns: ['name'])]
 #[ORM\Index(name: 'idx_exercises_muscle_category_id', columns: ['muscle_category_id'])]
-final class Exercise
+class Exercise
 {
     #[ORM\Id]
-    #[ORM\Column(type: 'ulid', unique: true)]
+    #[ORM\Column(type: 'uuid', unique: true)]
     private string $id;
 
     #[ORM\Column(type: 'string', length: 255, nullable: false)]
@@ -41,9 +53,9 @@ final class Exercise
     private function __construct(
         string $name,
         MuscleCategory $muscleCategory,
-        ?string $nameEn = null
+        ?string $nameEn = null,
     ) {
-        $this->id = (string) new Ulid();
+        $this->id = (string) Uuid::v4();
         $this->name = $name;
         $this->nameEn = $nameEn;
         $this->muscleCategory = $muscleCategory;
@@ -55,7 +67,7 @@ final class Exercise
     public static function create(
         string $name,
         MuscleCategory $muscleCategory,
-        ?string $nameEn = null
+        ?string $nameEn = null,
     ): self {
         return new self($name, $muscleCategory, $nameEn);
     }
@@ -98,4 +110,3 @@ final class Exercise
         return $this->workoutExercises;
     }
 }
-

@@ -1,0 +1,273 @@
+{
+  "categories": [
+    {
+      "name_pl": "Klatka piersiowa",
+      "name_en": "Chest",
+      "exercises": [
+        {
+          "name_pl": "Wyciskanie sztangi leżąc",
+          "name_en": "Barbell Bench Press"
+        },
+        {
+          "name_pl": "Wyciskanie hantli leżąc",
+          "name_en": "Dumbbell Bench Press"
+        },
+        {
+          "name_pl": "Wyciskanie sztangi skos dodatni",
+          "name_en": "Incline Barbell Bench Press"
+        },
+        {
+          "name_pl": "Wyciskanie hantli skos dodatni",
+          "name_en": "Incline Dumbbell Press"
+        },
+        {
+          "name_pl": "Rozpiętki z hantlami leżąc",
+          "name_en": "Dumbbell Flyes"
+        },
+        {
+          "name_pl": "Rozpiętki na bramie górnej",
+          "name_en": "Cable Crossover"
+        },
+        {
+          "name_pl": "Wyciskanie na maszynie siedząc",
+          "name_en": "Machine Chest Press"
+        },
+        {
+          "name_pl": "Pompki",
+          "name_en": "Push-ups"
+        },
+        {
+          "name_pl": "Wyciskanie wąskim chwytem (klatka)",
+          "name_en": "Close-Grip Bench Press (Chest)"
+        },
+        {
+          "name_pl": "Dipy na barki",
+          "name_en": "Chest Dips"
+        }
+      ]
+    },
+    {
+      "name_pl": "Plecy",
+      "name_en": "Back",
+      "exercises": [
+        {
+          "name_pl": "Podciąganie nachwytem",
+          "name_en": "Pull-up"
+        },
+        {
+          "name_pl": "Podciąganie podchwytem",
+          "name_en": "Chin-up"
+        },
+        {
+          "name_pl": "Martwy ciąg klasyczny",
+          "name_en": "Conventional Deadlift"
+        },
+        {
+          "name_pl": "Martwy ciąg sumo",
+          "name_en": "Sumo Deadlift"
+        },
+        {
+          "name_pl": "Wiosłowanie sztangą",
+          "name_en": "Barbell Row"
+        },
+        {
+          "name_pl": "Wiosłowanie hantlą w oparciu",
+          "name_en": "One-Arm Dumbbell Row"
+        },
+        {
+          "name_pl": "Wiosłowanie na wyciągu dolnym",
+          "name_en": "Seated Cable Row"
+        },
+        {
+          "name_pl": "Ściąganie drążka nachwytem",
+          "name_en": "Lat Pulldown"
+        },
+        {
+          "name_pl": "Ściąganie drążka podchwytem",
+          "name_en": "Underhand Lat Pulldown"
+        },
+        {
+          "name_pl": "Wznosy na ławce skos dodatni",
+          "name_en": "Incline Dumbbell Shrugs"
+        }
+      ]
+    },
+    {
+      "name_pl": "Nogi",
+      "name_en": "Legs",
+      "exercises": [
+        {
+          "name_pl": "Przysiad ze sztangą z tyłu",
+          "name_en": "Back Squat"
+        },
+        {
+          "name_pl": "Przysiad ze sztangą z przodu",
+          "name_en": "Front Squat"
+        },
+        {
+          "name_pl": "Przysiad bułgarski",
+          "name_en": "Bulgarian Split Squat"
+        },
+        {
+          "name_pl": "Wykroki ze sztangą",
+          "name_en": "Barbell Lunges"
+        },
+        {
+          "name_pl": "Wykroki z hantlami",
+          "name_en": "Dumbbell Lunges"
+        },
+        {
+          "name_pl": "Prostowanie nóg na maszynie",
+          "name_en": "Leg Extension"
+        },
+        {
+          "name_pl": "Uginanie nóg na maszynie",
+          "name_en": "Leg Curl"
+        },
+        {
+          "name_pl": "Prasa na maszynie",
+          "name_en": "Leg Press"
+        },
+        {
+          "name_pl": "Wypychanie bioder (Hip thrust)",
+          "name_en": "Hip Thrust"
+        },
+        {
+          "name_pl": "Wspięcia na palce stojąc",
+          "name_en": "Standing Calf Raise"
+        },
+        {
+          "name_pl": "Wspięcia na palce siedząc",
+          "name_en": "Seated Calf Raise"
+        },
+        {
+          "name_pl": "Rumunski martwy ciąg",
+          "name_en": "Romanian Deadlift"
+        }
+      ]
+    },
+    {
+      "name_pl": "Barki",
+      "name_en": "Shoulders",
+      "exercises": [
+        {
+          "name_pl": "Wyciskanie sztangi nad głowę stojąc (OHP)",
+          "name_en": "Overhead Press (OHP)"
+        },
+        {
+          "name_pl": "Wyciskanie hantli nad głowę siedząc",
+          "name_en": "Seated Dumbbell Press"
+        },
+        {
+          "name_pl": "Wznosy hantli bokiem stojąc",
+          "name_en": "Lateral Raise"
+        },
+        {
+          "name_pl": "Wznosy hantli przodem",
+          "name_en": "Front Raise"
+        },
+        {
+          "name_pl": "Wznosy hantli w opadzie tułowia (tył barków)",
+          "name_en": "Rear Delt Fly"
+        },
+        {
+          "name_pl": "Facepull na wyciągu",
+          "name_en": "Face Pull"
+        },
+        {
+          "name_pl": "Wyciskanie Arnolda",
+          "name_en": "Arnold Press"
+        },
+        {
+          "name_pl": "Wznosy na maszynie (tył barków)",
+          "name_en": "Reverse Pec Deck"
+        },
+        {
+          "name_pl": "Wyciskanie sztangi z klatki",
+          "name_en": "Push Press"
+        },
+        {
+          "name_pl": "Szrugsy ze sztangą",
+          "name_en": "Barbell Shrugs"
+        }
+      ]
+    },
+    {
+      "name_pl": "Biceps",
+      "name_en": "Biceps",
+      "exercises": [
+        {
+          "name_pl": "Uginanie ramion ze sztangą stojąc",
+          "name_en": "Barbell Curl"
+        },
+        {
+          "name_pl": "Uginanie ramion z hantlami",
+          "name_en": "Dumbbell Curl"
+        },
+        {
+          "name_pl": "Uginanie ramion na modlitewniku",
+          "name_en": "Preacher Curl"
+        },
+        {
+          "name_pl": "Uginanie ramion młotkiem",
+          "name_en": "Hammer Curl"
+        },
+        {
+          "name_pl": "Uginanie ramion na wyciągu dolnym",
+          "name_en": "Cable Curl"
+        },
+        {
+          "name_pl": "Uginanie ramion na koncentrację",
+          "name_en": "Concentration Curl"
+        },
+        {
+          "name_pl": "Uginanie ramion nachwytem",
+          "name_en": "Reverse Curl"
+        },
+        {
+          "name_pl": "Uginanie ramion z hantlami skośnie",
+          "name_en": "Incline Dumbbell Curl"
+        }
+      ]
+    },
+    {
+      "name_pl": "Triceps",
+      "name_en": "Triceps",
+      "exercises": [
+        {
+          "name_pl": "Wyciskanie francuskie leżąc",
+          "name_en": "Lying Triceps Extension"
+        },
+        {
+          "name_pl": "Wyciskanie francuskie stojąc z hantlą",
+          "name_en": "Overhead Dumbbell Extension"
+        },
+        {
+          "name_pl": "Prostowanie ramion na wyciągu górnym",
+          "name_en": "Cable Pushdown"
+        },
+        {
+          "name_pl": "Prostowanie ramion nachwytem na wyciągu",
+          "name_en": "Reverse Grip Pushdown"
+        },
+        {
+          "name_pl": "Wyciskanie wąskim chwytem (triceps)",
+          "name_en": "Close-Grip Bench Press (Triceps)"
+        },
+        {
+          "name_pl": "Dipy na poręczach",
+          "name_en": "Triceps Dips"
+        },
+        {
+          "name_pl": "Kickback z hantlą",
+          "name_en": "Triceps Kickback"
+        },
+        {
+          "name_pl": "Diamentowe pompki",
+          "name_en": "Diamond Push-ups"
+        }
+      ]
+    }
+  ]
+}
+

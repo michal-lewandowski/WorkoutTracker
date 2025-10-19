@@ -2,6 +2,18 @@
 
 declare(strict_types=1);
 
+/*
+ * This file is part of the proprietary project.
+ *
+ * This file and its contents are confidential and protected by copyright law.
+ * Unauthorized copying, distribution, or disclosure of this content
+ * is strictly prohibited without prior written consent from the author or
+ * copyright owner.
+ *
+ * For the full copyright and license information, please view the LICENSE.md
+ * file that was distributed with this source code.
+ */
+
 namespace App\Infrastructure\Repository;
 
 use App\Domain\Entity\MuscleCategory;
@@ -24,10 +36,25 @@ final class MuscleCategoryRepository extends ServiceEntityRepository implements 
      */
     public function findAll(): array
     {
+        /** @var array<int, MuscleCategory> */
         return $this->createQueryBuilder('mc')
             ->orderBy('mc.namePl', 'ASC')
             ->getQuery()
             ->getResult();
     }
-}
 
+    public function findById(string $id): ?MuscleCategory
+    {
+        try {
+
+            return $this->createQueryBuilder('mc')
+                ->where('mc.id = :id')
+                ->setParameter('id', $id)
+                ->getQuery()
+                ->getOneOrNullResult();
+        } catch (\Throwable $e) {
+            dd($e);
+        }
+        /** @var MuscleCategory|null */
+    }
+}

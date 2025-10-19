@@ -80,7 +80,7 @@ final readonly class MuscleCategoryDto
 ```
 
 **Pola DTO**:
-- `id` (string): Unikalny identyfikator ULID kategorii
+- `id` (string): Unikalny identyfikator uuid4 kategorii
 - `namePl` (string): Nazwa kategorii po polsku
 - `nameEn` (string): Nazwa kategorii po angielsku
 - `createdAt` (DateTimeImmutable): Data utworzenia kategorii
@@ -820,7 +820,7 @@ final class GetMuscleCategoriesControllerTest extends WebTestCase
             $this->assertIsString($category['nameEn']);
             $this->assertIsString($category['createdAt']);
             
-            // Sprawdź czy ID jest ULID (26 znaków)
+            // Sprawdź czy ID jest uuid4 (26 znaków)
             $this->assertEquals(26, strlen($category['id']));
             
             // Sprawdź czy nazwy nie są puste

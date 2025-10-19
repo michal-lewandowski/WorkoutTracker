@@ -2,7 +2,7 @@
 
 ## 1. Przegląd punktu końcowego
 
-Endpoint `GET /api/v1/auth/me` umożliwia pobranie profilu obecnie zalogowanego użytkownika. Jest to chroniony endpoint wymagający prawidłowego tokena JWT w nagłówku Authorization. Zwraca podstawowe informacje o użytkowniku: identyfikator (ULID), adres email oraz datę utworzenia konta.
+Endpoint `GET /api/v1/auth/me` umożliwia pobranie profilu obecnie zalogowanego użytkownika. Jest to chroniony endpoint wymagający prawidłowego tokena JWT w nagłówku Authorization. Zwraca podstawowe informacje o użytkowniku: identyfikator (uuid4), adres email oraz datę utworzenia konta.
 
 **Główne cechy**:
 - Prosta operacja odczytu (read-only)
@@ -64,7 +64,7 @@ curl -X GET https://localhost/api/v1/auth/me \
 final readonly class UserDto
 {
     public function __construct(
-        public string $id,                      // ULID użytkownika
+        public string $id,                      // uuid4 użytkownika
         public string $email,                   // Adres email
         public \DateTimeImmutable $createdAt,   // Data utworzenia konta
     ) {}
@@ -95,7 +95,7 @@ final readonly class UserDto
 **Lokalizacja**: `src/Domain/Entity/User.php`
 
 Wykorzystywane pola:
-- `id` (string, ULID)
+- `id` (string, uuid4)
 - `email` (string)
 - `createdAt` (DateTimeImmutable)
 
@@ -346,7 +346,7 @@ Nie są potrzebne custom Security Voters, ponieważ:
 
 #### Tylko dane publiczne
 UserDto zawiera wyłącznie:
-- `id` - identyfikator użytkownika (ULID, publiczny)
+- `id` - identyfikator użytkownika (uuid4, publiczny)
 - `email` - adres email (publiczny dla właściciela)
 - `createdAt` - data rejestracji (publiczny)
 
@@ -863,7 +863,7 @@ final class GetCurrentUserControllerTest extends WebTestCase
         $this->assertArrayHasKey('createdAt', $responseData);
         
         $this->assertSame($email, $responseData['email']);
-        $this->assertMatchesRegularExpression('/^[0-7][0-9A-HJKMNP-TV-Z]{25}$/', $responseData['id']); // ULID format
+        $this->assertMatchesRegularExpression('/^[0-7][0-9A-HJKMNP-TV-Z]{25}$/', $responseData['id']); // uuid4 format
         $this->assertMatchesRegularExpression('/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/', $responseData['createdAt']); // ISO 8601
         
         // Assert: Password is NOT in response

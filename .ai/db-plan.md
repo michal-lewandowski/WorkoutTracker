@@ -5,7 +5,7 @@
 Schemat bazy danych dla aplikacji WorkoutTracker - systemu śledzenia treningów oporowych. Projekt oparty na PostgreSQL, zoptymalizowany pod Symfony 7.3 (PHP 8.4) z wykorzystaniem Doctrine ORM.
 
 ### Kluczowe założenia projektowe
-- **Klucze główne**: ULID (CHAR(26)) - sortowalne chronologicznie, generowane w aplikacji
+- **Klucze główne**: uuid4 (CHAR(26)) - sortowalne chronologicznie, generowane w aplikacji
 - **Wielojęzyczność**: Przygotowanie pod i18n (polski domyślnie, angielski w przyszłości)
 - **Soft delete**: Dla workout_sessions (możliwość przywracania)
 - **Walidacja**: Logika biznesowa w aplikacji, nie w bazie danych
@@ -20,7 +20,7 @@ Tabela przechowująca konta użytkowników aplikacji.
 
 | Kolumna | Typ | Ograniczenia | Opis |
 |---------|-----|--------------|------|
-| `id` | CHAR(26) | PRIMARY KEY | ULID użytkownika |
+| `id` | CHAR(26) | PRIMARY KEY | uuid4 użytkownika |
 | `email` | VARCHAR(255) | NOT NULL | Adres email (normalizowany do lowercase) |
 | `password_hash` | VARCHAR(255) | NOT NULL | Hash hasła (bcrypt/argon2id) |
 | `created_at` | TIMESTAMPTZ | NOT NULL DEFAULT CURRENT_TIMESTAMP | Data rejestracji |
@@ -36,7 +36,7 @@ Słownik kategorii mięśniowych (6 rekordów stałych).
 
 | Kolumna | Typ | Ograniczenia | Opis |
 |---------|-----|--------------|------|
-| `id` | CHAR(26) | PRIMARY KEY | ULID kategorii |
+| `id` | CHAR(26) | PRIMARY KEY | uuid4 kategorii |
 | `name_pl` | VARCHAR(100) | NOT NULL UNIQUE | Nazwa po polsku |
 | `name_en` | VARCHAR(100) | NOT NULL UNIQUE | Nazwa po angielsku |
 | `created_at` | TIMESTAMPTZ | NOT NULL DEFAULT CURRENT_TIMESTAMP | Data utworzenia |
@@ -56,7 +56,7 @@ Słownik ćwiczeń oporowych (50-70 rekordów).
 
 | Kolumna | Typ | Ograniczenia | Opis |
 |---------|-----|--------------|------|
-| `id` | CHAR(26) | PRIMARY KEY | ULID ćwiczenia |
+| `id` | CHAR(26) | PRIMARY KEY | uuid4 ćwiczenia |
 | `name` | VARCHAR(255) | NOT NULL UNIQUE | Nazwa ćwiczenia (polski) |
 | `name_en` | VARCHAR(255) | NULL | Nazwa angielska (NULL w MVP) |
 | `muscle_category_id` | CHAR(26) | NOT NULL | FK do muscle_categories |
@@ -77,7 +77,7 @@ Sesje treningowe użytkowników (soft delete).
 
 | Kolumna | Typ | Ograniczenia | Opis |
 |---------|-----|--------------|------|
-| `id` | CHAR(26) | PRIMARY KEY | ULID sesji |
+| `id` | CHAR(26) | PRIMARY KEY | uuid4 sesji |
 | `user_id` | CHAR(26) | NOT NULL | FK do users |
 | `date` | DATE | NOT NULL DEFAULT CURRENT_DATE | Data sesji treningowej |
 | `name` | VARCHAR(255) | NULL | Opcjonalna nazwa sesji (np. "Trening A") |
@@ -106,7 +106,7 @@ Sesje treningowe użytkowników (soft delete).
 
 | Kolumna | Typ | Ograniczenia | Opis |
 |---------|-----|--------------|------|
-| `id` | CHAR(26) | PRIMARY KEY | ULID wpisu |
+| `id` | CHAR(26) | PRIMARY KEY | uuid4 wpisu |
 | `workout_session_id` | CHAR(26) | NOT NULL | FK do workout_sessions |
 | `exercise_id` | CHAR(26) | NOT NULL | FK do exercises |
 | `created_at` | TIMESTAMPTZ | NOT NULL DEFAULT CURRENT_TIMESTAMP | Data dodania (używana do sortowania) |
@@ -127,7 +127,7 @@ Grupy serii dla ćwiczeń (optymalizacja zapisu).
 
 | Kolumna | Typ | Ograniczenia | Opis |
 |---------|-----|--------------|------|
-| `id` | CHAR(26) | PRIMARY KEY | ULID grupy serii |
+| `id` | CHAR(26) | PRIMARY KEY | uuid4 grupy serii |
 | `workout_exercise_id` | CHAR(26) | NOT NULL | FK do workout_exercises |
 | `sets_count` | INTEGER | NOT NULL | Liczba serii (np. 3 w notacji 3x6@40kg) |
 | `reps` | INTEGER | NOT NULL | Liczba powtórzeń |
@@ -306,7 +306,7 @@ CREATE POLICY workout_sessions_isolation ON workout_sessions
 
 ## 5. Dodatkowe uwagi i decyzje projektowe
 
-### 5.1 ULID jako klucze główne
+### 5.1 uuid4 jako klucze główne
 
 **Format**: CHAR(26) - przykład: `01ARZ3NDEKTSV4RRFFQ69G5FAV`
 
@@ -318,14 +318,14 @@ CREATE POLICY workout_sessions_isolation ON workout_sessions
 
 **Implementacja w Symfony**:
 ```php
-use Symfony\Component\Uid\Ulid;
+use Symfony\Component\Uid\uuid4;
 
 #[ORM\Id]
 #[ORM\Column(type: 'string', length: 26)]
 private string $id;
 
 public function __construct() {
-    $this->id = (string) new Ulid();
+    $this->id = (string) new uuid4();
 }
 ```
 
@@ -402,7 +402,7 @@ SELECT * FROM workout_sessions WHERE deleted_at IS NOT NULL;
 - Naturalny porządek chronologiczny (kolejność dodawania)
 - Prostszy model danych (mniej kolumn)
 - Brak konieczności zarządzania kolejnością przy edycji/usuwaniu
-- ULID w `created_at` zapewnia mikrosekundową precyzję
+- uuid4 w `created_at` zapewnia mikrosekundową precyzję
 
 **Zapytania**:
 ```sql
@@ -542,7 +542,7 @@ php bin/console doctrine:fixtures:load  # dla seed data
 
 | Aspekt | Decyzja | Uzasadnienie |
 |--------|---------|--------------|
-| **Klucze główne** | ULID (CHAR(26)) | Sortowalne, bezpieczne, zgodne z Symfony |
+| **Klucze główne** | uuid4 (CHAR(26)) | Sortowalne, bezpieczne, zgodne z Symfony |
 | **Ciężar** | INTEGER (gramy) | Eliminuje floating point errors, wydajność |
 | **Timestamps** | TIMESTAMPTZ | Obsługa stref czasowych, audit |
 | **Soft delete** | Tylko workout_sessions | Możliwość przywracania, audit usunięć |

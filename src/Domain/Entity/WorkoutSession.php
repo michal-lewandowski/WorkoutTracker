@@ -2,12 +2,24 @@
 
 declare(strict_types=1);
 
+/*
+ * This file is part of the proprietary project.
+ *
+ * This file and its contents are confidential and protected by copyright law.
+ * Unauthorized copying, distribution, or disclosure of this content
+ * is strictly prohibited without prior written consent from the author or
+ * copyright owner.
+ *
+ * For the full copyright and license information, please view the LICENSE.md
+ * file that was distributed with this source code.
+ */
+
 namespace App\Domain\Entity;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Uid\Ulid;
+use Symfony\Component\Uid\Uuid;
 
 #[ORM\Entity]
 #[ORM\Table(name: 'workout_sessions')]
@@ -17,14 +29,14 @@ use Symfony\Component\Uid\Ulid;
 final class WorkoutSession
 {
     #[ORM\Id]
-    #[ORM\Column(type: 'ulid', unique: true)]
+    #[ORM\Column(type: 'uuid', unique: true)]
     private string $id;
 
     #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'workoutSessions')]
     #[ORM\JoinColumn(name: 'user_id', referencedColumnName: 'id', nullable: false, onDelete: 'CASCADE')]
     private User $user;
 
-    #[ORM\Column(type: 'date', nullable: false)]
+    #[ORM\Column(type: 'datetime_immutable', nullable: false)]
     private \DateTimeImmutable $date;
 
     #[ORM\Column(type: 'string', length: 255, nullable: true)]
@@ -36,7 +48,7 @@ final class WorkoutSession
     #[ORM\Column(name: 'deleted_at', type: 'datetime_immutable', nullable: true)]
     private ?\DateTimeImmutable $deletedAt;
 
-    #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'deletedWorkoutSessions')]
+    #[ORM\ManyToOne(targetEntity: User::class)]
     #[ORM\JoinColumn(name: 'deleted_by', referencedColumnName: 'id', nullable: true, onDelete: 'SET NULL')]
     private ?User $deletedBy;
 
@@ -53,9 +65,9 @@ final class WorkoutSession
         User $user,
         \DateTimeImmutable $date,
         ?string $name = null,
-        ?string $notes = null
+        ?string $notes = null,
     ) {
-        $this->id = (string) new Ulid();
+        $this->id = (string) Uuid::v4();
         $this->user = $user;
         $this->date = $date;
         $this->name = $name;
@@ -71,7 +83,7 @@ final class WorkoutSession
         User $user,
         \DateTimeImmutable $date,
         ?string $name = null,
-        ?string $notes = null
+        ?string $notes = null,
     ): self {
         return new self($user, $date, $name, $notes);
     }
@@ -131,7 +143,41 @@ final class WorkoutSession
 
     public function isDeleted(): bool
     {
-        return $this->deletedAt !== null;
+        return null !== $this->deletedAt;
+    }
+
+    /**
+     * Aktualizacja metadanych sesji treningowej.
+     */
+    public function update(
+        \DateTimeImmutable $date,
+        ?string $name = null,
+        ?string $notes = null
+    ): void {
+        $this->date = $date;
+        $this->name = $name;
+        $this->notes = $notes;
+        $this->updatedAt = new \DateTimeImmutable();
+    }
+
+    /**
+     * Soft delete sesji treningowej.
+     */
+    public function delete(User $deletedBy): void
+    {
+        if ($this->isDeleted()) {
+            throw new \LogicException('Workout session is already deleted');
+        }
+
+        $this->deletedAt = new \DateTimeImmutable();
+        $this->deletedBy = $deletedBy;
+    }
+
+    /**
+     * Sprawdzenie czy sesja należy do użytkownika.
+     */
+    public function belongsToUser(User $user): bool
+    {
+        return $this->user->getId() === $user->getId();
     }
 }
-
