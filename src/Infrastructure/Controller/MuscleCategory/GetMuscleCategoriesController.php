@@ -19,7 +19,7 @@ namespace App\Infrastructure\Controller\MuscleCategory;
 use App\Domain\Repository\MuscleCategoryRepositoryInterface;
 use App\Infrastructure\Api\Output\MuscleCategoryDto;
 use Doctrine\DBAL\Exception\ConnectionException;
-use Doctrine\ORM\ORMException;
+use Doctrine\ORM\Exception\ORMException;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;

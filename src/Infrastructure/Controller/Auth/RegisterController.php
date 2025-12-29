@@ -20,7 +20,6 @@ use App\Application\Command\Auth\RegisterUserCommand;
 use App\Application\Command\Auth\RegisterUserHandler;
 use App\Domain\Exception\EmailAlreadyExistsException;
 use App\Domain\Repository\UserRepositoryInterface;
-use App\Domain\Service\UserRegistrationServiceInterface;
 use App\Infrastructure\Api\Input\RegisterRequestDto;
 use App\Infrastructure\Api\Output\AuthResponseDto;
 use App\Infrastructure\Api\Output\UserDto;
@@ -35,7 +34,6 @@ use Symfony\Component\Routing\Attribute\Route;
 final class RegisterController extends AbstractController
 {
     public function __construct(
-        private readonly UserRegistrationServiceInterface $registrationService,
         private readonly RegisterUserHandler $handler,
         private JWTTokenManagerInterface $jwtManager,
         private UserRepositoryInterface $userRepository,
