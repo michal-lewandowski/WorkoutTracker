@@ -89,4 +89,9 @@ class Exercise
     {
         return $this->updatedAt;
     }
+
+    public function getWorkoutExercises(): Collection
+    {
+        return $this->workoutExercises;
+    }
 }

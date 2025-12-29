@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Application\Command\WorkoutExercise;
 
 use App\Domain\Entity\ExerciseSet;
-use App\Domain\Entity\WorkoutExercise;
 use App\Domain\Exception\WorkoutExerciseNotFoundException;
 use App\Domain\Repository\WorkoutExerciseRepositoryInterface;
 

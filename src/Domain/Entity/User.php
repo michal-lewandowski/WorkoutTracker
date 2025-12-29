@@ -92,4 +92,14 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         return $this->createdAt;
     }
+
+    public function getUpdatedAt(): \DateTimeImmutable
+    {
+        return $this->updatedAt;
+    }
+
+    public function getWorkoutSessions(): Collection
+    {
+        return $this->workoutSessions;
+    }
 }

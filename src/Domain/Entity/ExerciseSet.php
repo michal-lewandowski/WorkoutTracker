@@ -79,4 +79,14 @@ readonly class ExerciseSet
     {
         return $this->weightGrams / 1000;
     }
+
+    public function getWorkoutExercise(): WorkoutExercise
+    {
+        return $this->workoutExercise;
+    }
+
+    public function getWeightGrams(): int
+    {
+        return $this->weightGrams;
+    }
 }

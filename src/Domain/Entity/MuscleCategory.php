@@ -66,4 +66,9 @@ class MuscleCategory
     {
         return $this->createdAt;
     }
+
+    public function getExercises(): Collection
+    {
+        return $this->exercises;
+    }
 }
