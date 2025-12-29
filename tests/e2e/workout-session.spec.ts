@@ -7,13 +7,12 @@ import { test, expect } from '@playwright/test';
 import { setupAuthenticatedState } from './helpers/auth.helpers';
 import { addExerciseToSession, addSetToExercise } from './helpers/session.helpers';
 import { TEST_WORKOUT, TEST_SETS, generateWorkoutName, getTodayDate } from './fixtures/test-data';
-import { resetDatabase } from './helpers/database.helpers';
+// Database reset moved to global-setup.ts
 
 test.describe('Zarządzanie sesjami treningowymi', () => {
   
   // Login before each test
   test.beforeEach(async ({ page }) => {
-      await resetDatabase();
       await setupAuthenticatedState(page);
   });
 

@@ -21,12 +21,12 @@ final class Version20251011194251 extends AbstractMigration
     {
         // this up() migration is auto-generated, please modify it to your needs
         $this->addSql('CREATE TABLE exercise_sets (id UUID NOT NULL, workout_exercise_id UUID NOT NULL, sets_count INT NOT NULL, reps INT NOT NULL, weight_grams INT NOT NULL, created_at TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL, PRIMARY KEY(id))');
-        $this->addSql('CREATE INDEX idx_exercise_sets_workout_exercise_id ON exercise_sets (workout_exercise_id)');
+        $this->addSql('CREATE INDEX IF NOT EXISTS idx_exercise_sets_workout_exercise_id ON exercise_sets (workout_exercise_id)');
         $this->addSql('COMMENT ON COLUMN exercise_sets.id IS \'(DC2Type:uuid)\'');
         $this->addSql('COMMENT ON COLUMN exercise_sets.workout_exercise_id IS \'(DC2Type:uuid)\'');
         $this->addSql('COMMENT ON COLUMN exercise_sets.created_at IS \'(DC2Type:datetime_immutable)\'');
         $this->addSql('CREATE TABLE exercises (id UUID NOT NULL, muscle_category_id UUID NOT NULL, name VARCHAR(255) NOT NULL, name_en VARCHAR(255) DEFAULT NULL, created_at TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL, updated_at TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL, PRIMARY KEY(id))');
-        $this->addSql('CREATE INDEX idx_exercises_muscle_category_id ON exercises (muscle_category_id)');
+        $this->addSql('CREATE INDEX IF NOT EXISTS idx_exercises_muscle_category_id ON exercises (muscle_category_id)');
         $this->addSql('CREATE UNIQUE INDEX idx_exercises_name ON exercises (name)');
         $this->addSql('COMMENT ON COLUMN exercises.id IS \'(DC2Type:uuid)\'');
         $this->addSql('COMMENT ON COLUMN exercises.muscle_category_id IS \'(DC2Type:uuid)\'');
@@ -38,22 +38,22 @@ final class Version20251011194251 extends AbstractMigration
         $this->addSql('COMMENT ON COLUMN muscle_categories.id IS \'(DC2Type:uuid)\'');
         $this->addSql('COMMENT ON COLUMN muscle_categories.created_at IS \'(DC2Type:datetime_immutable)\'');
         $this->addSql('CREATE TABLE users (id UUID NOT NULL, email VARCHAR(255) NOT NULL, password_hash VARCHAR(255) NOT NULL, created_at TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL, updated_at TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL, PRIMARY KEY(id))');
-        $this->addSql('CREATE INDEX idx_users_email_lower ON users (email)');
+        $this->addSql('CREATE INDEX IF NOT EXISTS idx_users_email_lower ON users (email)');
         $this->addSql('COMMENT ON COLUMN users.id IS \'(DC2Type:uuid)\'');
         $this->addSql('COMMENT ON COLUMN users.created_at IS \'(DC2Type:datetime_immutable)\'');
         $this->addSql('COMMENT ON COLUMN users.updated_at IS \'(DC2Type:datetime_immutable)\'');
         $this->addSql('CREATE TABLE workout_exercises (id UUID NOT NULL, workout_session_id UUID NOT NULL, exercise_id UUID NOT NULL, created_at TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL, PRIMARY KEY(id))');
-        $this->addSql('CREATE INDEX idx_workout_exercises_workout_session_id ON workout_exercises (workout_session_id)');
-        $this->addSql('CREATE INDEX idx_workout_exercises_exercise_id ON workout_exercises (exercise_id)');
+        $this->addSql('CREATE INDEX IF NOT EXISTS idx_workout_exercises_workout_session_id ON workout_exercises (workout_session_id)');
+        $this->addSql('CREATE INDEX IF NOT EXISTS idx_workout_exercises_exercise_id ON workout_exercises (exercise_id)');
         $this->addSql('COMMENT ON COLUMN workout_exercises.id IS \'(DC2Type:uuid)\'');
         $this->addSql('COMMENT ON COLUMN workout_exercises.workout_session_id IS \'(DC2Type:uuid)\'');
         $this->addSql('COMMENT ON COLUMN workout_exercises.exercise_id IS \'(DC2Type:uuid)\'');
         $this->addSql('COMMENT ON COLUMN workout_exercises.created_at IS \'(DC2Type:datetime_immutable)\'');
         $this->addSql('CREATE TABLE workout_sessions (id UUID NOT NULL, user_id UUID NOT NULL, deleted_by UUID DEFAULT NULL, date DATE NOT NULL, name VARCHAR(255) DEFAULT NULL, notes TEXT DEFAULT NULL, deleted_at TIMESTAMP(0) WITHOUT TIME ZONE DEFAULT NULL, created_at TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL, updated_at TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL, PRIMARY KEY(id))');
-        $this->addSql('CREATE INDEX IDX_421170A5A76ED395 ON workout_sessions (user_id)');
-        $this->addSql('CREATE INDEX idx_workout_sessions_user_id_date ON workout_sessions (user_id, date)');
-        $this->addSql('CREATE INDEX idx_workout_sessions_deleted_by ON workout_sessions (deleted_by)');
-        $this->addSql('CREATE INDEX idx_workout_sessions_active ON workout_sessions (user_id, date)');
+        $this->addSql('CREATE INDEX IF NOT EXISTS IDX_421170A5A76ED395 ON workout_sessions (user_id)');
+        $this->addSql('CREATE INDEX IF NOT EXISTS idx_workout_sessions_user_id_date ON workout_sessions (user_id, date)');
+        $this->addSql('CREATE INDEX IF NOT EXISTS idx_workout_sessions_deleted_by ON workout_sessions (deleted_by)');
+        $this->addSql('CREATE INDEX IF NOT EXISTS idx_workout_sessions_active ON workout_sessions (user_id, date)');
         $this->addSql('COMMENT ON COLUMN workout_sessions.id IS \'(DC2Type:uuid)\'');
         $this->addSql('COMMENT ON COLUMN workout_sessions.user_id IS \'(DC2Type:uuid)\'');
         $this->addSql('COMMENT ON COLUMN workout_sessions.deleted_by IS \'(DC2Type:uuid)\'');

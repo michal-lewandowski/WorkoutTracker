@@ -14,13 +14,12 @@ import {
   verifyJWTFormat,
 } from './helpers/auth.helpers';
 import { TEST_USERS } from './fixtures/test-data';
-import { resetDatabase } from './helpers/database.helpers';
+// Database reset moved to global-setup.ts
 
 test.describe('Autentykacja użytkownika', () => {
   
-  // Clear state before each test
+  // Clear auth state before each test
   test.beforeEach(async ({ page }) => {
-      await resetDatabase();
       await clearAuthState(page);
   });
 

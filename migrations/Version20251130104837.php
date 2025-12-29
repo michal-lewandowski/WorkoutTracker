@@ -31,7 +31,7 @@ final class Version20251130104837 extends AbstractMigration
         // this down() migration is auto-generated, please modify it to your needs
         $this->addSql('CREATE SCHEMA public');
         $this->addSql('DROP INDEX UNIQ_1483A5E9E7927C74');
-        $this->addSql('CREATE INDEX idx_users_email_lower ON users (email)');
+        $this->addSql('CREATE INDEX IF NOT EXISTS idx_users_email_lower ON users (email)');
         $this->addSql('ALTER TABLE workout_sessions ALTER date TYPE DATE');
         $this->addSql('COMMENT ON COLUMN workout_sessions.date IS NULL');
     }
