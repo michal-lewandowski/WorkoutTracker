@@ -9,7 +9,7 @@ import { addExerciseToSession, addSetToExercise } from './helpers/session.helper
 import { TEST_WORKOUT, TEST_SETS, generateWorkoutName, getTodayDate } from './fixtures/test-data';
 // Database reset moved to global-setup.ts
 
-test.describe('Zarządzanie sesjami treningowymi', () => {
+test.describe('Workout Session Management', () => {
   
   // Login before each test
   test.beforeEach(async ({ page }) => {
@@ -20,7 +20,7 @@ test.describe('Zarządzanie sesjami treningowymi', () => {
   // Navigation Tests
   // ============================================
 
-  test('Przycisk "Nowa sesja" przekierowuje na formularz', async ({ page }) => {
+  test('The "New session" button redirects to the form', async ({ page }) => {
     await page.goto('/dashboard');
     
     // Find and click "new session" button
@@ -33,7 +33,7 @@ test.describe('Zarządzanie sesjami treningowymi', () => {
     await expect(page.locator('h1')).toContainText(/nowa sesja/i);
   });
 
-  test('Formularz nowej sesji jest dostępny', async ({ page }) => {
+  test('New session form is available', async ({ page }) => {
     await page.goto('/dashboard/sessions/new');
     
     // Verify form elements are present
@@ -48,7 +48,7 @@ test.describe('Zarządzanie sesjami treningowymi', () => {
   // Create Workout Session Tests
   // ============================================
 
-  test('Użytkownik może utworzyć prostą sesję treningową', async ({ page }) => {
+  test('User can create a simple workout session', async ({ page }) => {
     // Navigate to new session form
     await page.goto('/dashboard/sessions/new');
     
@@ -91,7 +91,7 @@ test.describe('Zarządzanie sesjami treningowymi', () => {
     await expect(page.locator('h1').first()).toContainText(workoutName);
   });
 
-  test('Można dodać wiele ćwiczeń do jednej sesji', async ({ page }) => {
+  test('Multiple exercises can be added to a single session', async ({ page }) => {
     await page.goto('/dashboard/sessions/new');
     
     // Fill basic data
@@ -113,7 +113,7 @@ test.describe('Zarządzanie sesjami treningowymi', () => {
     expect(count).toBeGreaterThanOrEqual(3);
   });
 
-  test('Można dodać wiele serii do jednego ćwiczenia', async ({ page }) => {
+  test('Multiple sets can be added to a single exercise', async ({ page }) => {
     await page.goto('/dashboard/sessions/new');
     
     // Fill basic data

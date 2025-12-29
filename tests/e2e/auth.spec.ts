@@ -16,7 +16,7 @@ import {
 import { TEST_USERS } from './fixtures/test-data';
 // Database reset moved to global-setup.ts
 
-test.describe('Autentykacja użytkownika', () => {
+test.describe('User Authentication', () => {
   
   // Clear auth state before each test
   test.beforeEach(async ({ page }) => {
@@ -27,7 +27,7 @@ test.describe('Autentykacja użytkownika', () => {
   // Successful Login Tests
   // ============================================
 
-  test('Użytkownik może zalogować się z poprawnymi danymi', async ({ page }) => {
+  test('User can login with valid credentials', async ({ page }) => {
     // Arrange
     const { email, password } = TEST_USERS.valid;
     
@@ -59,7 +59,7 @@ test.describe('Autentykacja użytkownika', () => {
 //   // Logout Tests
 //   // ============================================
 
-  test('Użytkownik może się wylogować', async ({ page }) => {
+  test('User can logout', async ({ page }) => {
     // Login first
     await loginUser(page);
     await expectDashboard(page);
@@ -75,7 +75,7 @@ test.describe('Autentykacja użytkownika', () => {
     expect(token).toBeNull();
   });
 
-  test('Po wylogowaniu nie można dostać się do chronionych stron', async ({ page }) => {
+  test('After logout, protected routes are inaccessible', async ({ page }) => {
     // Login first
     await loginUser(page);
     
