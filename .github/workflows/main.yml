@@ -16,8 +16,11 @@ jobs:
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
       
-    - name: Build Docker test images
-      run: docker compose -f compose.yaml -f compose.dev.yaml build
+    - name: Build PHP Docker image
+      run: docker build -t app-php -f Dockerfile --target frankenphp_dev .
+      
+    - name: Build frontend Docker image
+      run: docker build -t app-frontend -f frontend/Dockerfile --target deps ./frontend
       
     - name: Verify images were built
       run: docker images
@@ -49,13 +52,15 @@ jobs:
         docker run --network host \
           -e DATABASE_URL="postgresql://postgres:postgres@localhost:5432/workout_tracker_test?serverVersion=15&charset=utf8" \
           -e APP_ENV=test \
-          workouttracker-php-1 \
+          -v ${{ github.workspace }}:/app \
+          app-php \
           php bin/phpunit
           
     - name: Run PHPStan in Docker container
       run: |
         docker run \
-          workouttracker-php-1 \
+          -v ${{ github.workspace }}:/app \
+          app-php \
           vendor/bin/phpstan analyse src --level=5
 
   frontend-tests:
@@ -68,52 +73,60 @@ jobs:
     - name: Run frontend linting in Docker container
       run: |
         docker run \
-          workouttracker-frontend-1 \
+          -v ${{ github.workspace }}/frontend:/app \
+          app-frontend \
           npm run lint
     
     - name: Run frontend build in Docker container
       run: |
         docker run \
-          workouttracker-frontend-1 \
+          -v ${{ github.workspace }}/frontend:/app \
+          app-frontend \
           npm run build
 
   e2e-tests:
     runs-on: ubuntu-latest
-    needs: [build-test-images]
+    needs: [backend-tests, frontend-tests]
     
     steps:
     - uses: actions/checkout@v4
     
-    - name: Start services with Docker Compose
-      run: docker compose -f compose.yaml -f compose.dev.yaml up -d
-    
-    - name: Install Playwright in container
+    - name: Build and start all services with Docker Compose
       run: |
-        docker run \
-          workouttracker-frontend-1 \
-          npx playwright install --with-deps
+        docker compose -f compose.yaml -f compose.dev.yaml build
+        docker compose -f compose.yaml -f compose.dev.yaml up -d
+    
+    - name: List running containers
+      run: docker ps -a
+      
+    - name: Install Playwright
+      run: |
+        npm ci
+        npx playwright install --with-deps
 
     - name: Wait for services to be ready
       run: |
         sleep 20
-        docker ps
+        # Check that services are running
+        curl --retry 8 --retry-delay 5 http://localhost:80 || echo "Frontend not responding"
+        curl --retry 8 --retry-delay 5 http://localhost:80/api || echo "Backend not responding"
     
-    - name: Run E2E Tests in container
+    - name: Run E2E Tests
       run: |
-        docker exec workouttracker-frontend-1 npx playwright test
-
+        npx playwright test
+        
     - name: Collect test artifacts on failure
       if: failure()
       run: |
-        mkdir -p playwright-report
-        docker cp workouttracker-frontend-1:/app/playwright-report ./
+        mkdir -p playwright-report-artifact
+        cp -r playwright-report/* playwright-report-artifact/ || echo "No test artifacts to collect"
 
     - name: Upload test results
       if: always()
       uses: actions/upload-artifact@v3
       with:
         name: playwright-results
-        path: playwright-report/
+        path: playwright-report-artifact/
         retention-days: 7
         
     - name: Shutdown services
@@ -122,32 +135,37 @@ jobs:
 
   build-production:
     runs-on: ubuntu-latest
-    needs: [backend-tests, frontend-tests, e2e-tests]
+    needs: [e2e-tests]
     if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main'
     
     steps:
     - uses: actions/checkout@v4
 
-    - name: Build Docker production images
-      run: |
-        docker compose -f compose.yaml -f compose.prod.yaml build
+    - name: Build PHP production image
+      run: docker build -t app-php-prod -f Dockerfile --target frankenphp_prod .
         
-    # Add deployment steps here if needed
-    # This is where you would push to a registry and deploy
-    
-    - name: Verify production build
+    - name: Build frontend production image
+      run: docker build -t app-frontend-prod -f frontend/Dockerfile --target runner ./frontend
+        
+    - name: Start production services
       run: |
-        # Start production containers
+        # Update image names in compose file to use built images
+        export IMAGES_PREFIX=""
         docker compose -f compose.yaml -f compose.prod.yaml up -d
         
-        # Verify they started successfully
-        docker ps
+    - name: Verify services started
+      run: docker ps
         
-        # Check if backend is responding
-        curl --fail --retry 8 --retry-delay 5 http://localhost:8000/api/health || exit 1
+    - name: Check backend health
+      run: |
+        # Wait for backend to be available
+        curl --fail --retry 8 --retry-delay 5 http://localhost/api/health || exit 1
         
-        # Check if frontend is responding
-        curl --fail --retry 8 --retry-delay 5 http://localhost:3000/api/health || exit 1
+    - name: Check frontend health
+      run: |
+        # Wait for frontend to be available
+        curl --fail --retry 8 --retry-delay 5 http://localhost/ || exit 1
         
-        # Cleanup
-        docker compose -f compose.yaml -f compose.prod.yaml down --volumes
+    - name: Cleanup
+      if: always()
+      run: docker compose -f compose.yaml -f compose.prod.yaml down --volumes
