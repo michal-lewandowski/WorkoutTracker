@@ -2,18 +2,6 @@
 
 declare(strict_types=1);
 
-/*
- * This file is part of the proprietary project.
- *
- * This file and its contents are confidential and protected by copyright law.
- * Unauthorized copying, distribution, or disclosure of this content
- * is strictly prohibited without prior written consent from the author or
- * copyright owner.
- *
- * For the full copyright and license information, please view the LICENSE.md
- * file that was distributed with this source code.
- */
-
 namespace App\Infrastructure\Controller\WorkoutExercise;
 
 use App\Application\Command\WorkoutExercise\UpdateWorkoutExerciseCommand;
@@ -48,7 +36,6 @@ final class UpdateWorkoutExerciseController extends AbstractController
         /** @var User $user */
         $user = $this->getUser();
 
-        // Przygotowanie danych sets (konwersja DTO do array)
         $sets = array_map(
             fn ($setDto) => [
                 'setsCount' => $setDto->setsCount,
@@ -58,19 +45,16 @@ final class UpdateWorkoutExerciseController extends AbstractController
             $requestDto->sets
         );
 
-        // Utworzenie commanda
         $command = new UpdateWorkoutExerciseCommand(
             userId: $user->getId(),
             workoutExerciseId: $id,
             sets: $sets
         );
 
-        // Wykonanie commanda
         $this->handler->handle($command);
 
         $workoutExercise = $this->workoutExerciseRepository->findById($command->workoutExerciseId);
 
-        // Mapowanie encji na DTO
         $exercise = $workoutExercise->getExercise();
         $exerciseSummaryDto = new ExerciseSummaryDto(
             id: $exercise->getId(),

@@ -2,18 +2,6 @@
 
 declare(strict_types=1);
 
-/*
- * This file is part of the proprietary project.
- *
- * This file and its contents are confidential and protected by copyright law.
- * Unauthorized copying, distribution, or disclosure of this content
- * is strictly prohibited without prior written consent from the author or
- * copyright owner.
- *
- * For the full copyright and license information, please view the LICENSE.md
- * file that was distributed with this source code.
- */
-
 namespace App\Infrastructure\Controller\Statistics;
 
 use App\Application\Query\Statistics\GetExerciseStatisticsQuery;
@@ -41,7 +29,6 @@ final class GetExerciseStatisticsController extends AbstractController
         string $exerciseId,
         #[MapQueryString] ?GetExerciseStatisticsQueryDto $queryDto = null,
     ): JsonResponse {
-        // Walidacja UUID exerciseId
         if (!Uuid::isValid($exerciseId)) {
             return $this->json([
                 'error' => 'Invalid exercise ID format',
@@ -49,13 +36,11 @@ final class GetExerciseStatisticsController extends AbstractController
             ], Response::HTTP_BAD_REQUEST);
         }
 
-        // Default values if no query params provided
         $queryDto ??= new GetExerciseStatisticsQueryDto();
 
         /** @var User $user */
         $user = $this->getUser();
 
-        // Konwersja dat z string na DateTimeImmutable jeśli są ustawione
         $dateFrom = null !== $queryDto->dateFrom
             ? new \DateTimeImmutable($queryDto->dateFrom)
             : null;
@@ -64,7 +49,6 @@ final class GetExerciseStatisticsController extends AbstractController
             ? new \DateTimeImmutable($queryDto->dateTo)
             : null;
 
-        // Utworzenie komendy
         $command = new GetExerciseStatisticsQuery(
             exerciseId: $exerciseId,
             userId: $user->getId(),
@@ -73,7 +57,6 @@ final class GetExerciseStatisticsController extends AbstractController
             limit: $queryDto->limit,
         );
 
-        // Wykonanie komendy
         $statistics = $this->handler->handle($command);
 
         return $this->json($statistics, Response::HTTP_OK);

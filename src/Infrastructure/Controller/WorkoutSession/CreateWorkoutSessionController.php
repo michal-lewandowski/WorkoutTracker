@@ -2,18 +2,6 @@
 
 declare(strict_types=1);
 
-/*
- * This file is part of the proprietary project.
- *
- * This file and its contents are confidential and protected by copyright law.
- * Unauthorized copying, distribution, or disclosure of this content
- * is strictly prohibited without prior written consent from the author or
- * copyright owner.
- *
- * For the full copyright and license information, please view the LICENSE.md
- * file that was distributed with this source code.
- */
-
 namespace App\Infrastructure\Controller\WorkoutSession;
 
 use App\Application\Command\WorkoutSession\CreateWorkoutSessionCommand;
@@ -46,10 +34,8 @@ final class CreateWorkoutSessionController extends AbstractController
         /** @var User $user */
         $user = $this->getUser();
 
-        // Konwersja daty z string na DateTimeImmutable
         $date = new \DateTimeImmutable($requestDto->date);
 
-        // Utworzenie commanda
         $command = new CreateWorkoutSessionCommand(
             id: Uuid::v4(),
             user: $user,
@@ -58,18 +44,16 @@ final class CreateWorkoutSessionController extends AbstractController
             notes: $requestDto->notes
         );
 
-        // Wykonanie commanda
         $this->handler->handle($command);
         $workoutSession = $this->workoutSessionRepository->findById((string) $command->id);
 
-        // Mapowanie encji na DTO
         $responseDto = new WorkoutSessionDetailDto(
             id: $workoutSession->getId(),
             userId: $workoutSession->getUser()->getId(),
             date: $workoutSession->getDate()->format('Y-m-d'),
             name: $workoutSession->getName(),
             notes: $workoutSession->getNotes(),
-            workoutExercises: [], // Nowa sesja nie ma jeszcze ćwiczeń
+            workoutExercises: [],
             createdAt: $workoutSession->getCreatedAt(),
             updatedAt: $workoutSession->getUpdatedAt()
         );

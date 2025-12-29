@@ -2,18 +2,6 @@
 
 declare(strict_types=1);
 
-/*
- * This file is part of the proprietary project.
- *
- * This file and its contents are confidential and protected by copyright law.
- * Unauthorized copying, distribution, or disclosure of this content
- * is strictly prohibited without prior written consent from the author or
- * copyright owner.
- *
- * For the full copyright and license information, please view the LICENSE.md
- * file that was distributed with this source code.
- */
-
 namespace App\Infrastructure\Controller\Exercise;
 
 use App\Domain\Repository\ExerciseRepositoryInterface;
@@ -42,11 +30,9 @@ final class GetExercisesController extends AbstractController
     public function __invoke(
         #[MapQueryString] ?GetExercisesQueryDto $queryDto = null,
     ): JsonResponse {
-        // Default values if no query params provided
         $queryDto ??= new GetExercisesQueryDto();
 
         try {
-            // Validate muscle category exists if provided
             if (null !== $queryDto->muscleCategoryId) {
                 if (!Uuid::isValid($queryDto->muscleCategoryId)) {
                     return $this->json([
@@ -71,13 +57,11 @@ final class GetExercisesController extends AbstractController
                 }
             }
 
-            // Fetch exercises with filters
             $exercises = $this->exerciseRepository->findByFilters(
                 muscleCategoryId: $queryDto->muscleCategoryId,
                 search: $queryDto->search
             );
 
-            // Transform to DTOs with language preference
             $exerciseDtos = array_map(
                 fn ($exercise) => ExerciseDto::fromEntity($exercise, $queryDto->lang),
                 $exercises

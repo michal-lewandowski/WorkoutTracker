@@ -2,18 +2,6 @@
 
 declare(strict_types=1);
 
-/*
- * This file is part of the proprietary project.
- *
- * This file and its contents are confidential and protected by copyright law.
- * Unauthorized copying, distribution, or disclosure of this content
- * is strictly prohibited without prior written consent from the author or
- * copyright owner.
- *
- * For the full copyright and license information, please view the LICENSE.md
- * file that was distributed with this source code.
- */
-
 namespace App\Domain\Entity;
 
 use Doctrine\Common\Collections\ArrayCollection;
@@ -148,9 +136,6 @@ class WorkoutSession
         return null !== $this->deletedAt;
     }
 
-    /**
-     * Aktualizacja metadanych sesji treningowej.
-     */
     public function update(
         \DateTimeImmutable $date,
         ?string $name = null,
@@ -162,9 +147,6 @@ class WorkoutSession
         $this->updatedAt = new \DateTimeImmutable();
     }
 
-    /**
-     * Soft delete sesji treningowej.
-     */
     public function delete(User $deletedBy): void
     {
         if ($this->isDeleted()) {
@@ -173,13 +155,5 @@ class WorkoutSession
 
         $this->deletedAt = new \DateTimeImmutable();
         $this->deletedBy = $deletedBy;
-    }
-
-    /**
-     * Sprawdzenie czy sesja należy do użytkownika.
-     */
-    public function belongsToUser(User $user): bool
-    {
-        return $this->user->getId() === $user->getId();
     }
 }

@@ -2,18 +2,6 @@
 
 declare(strict_types=1);
 
-/*
- * This file is part of the proprietary project.
- *
- * This file and its contents are confidential and protected by copyright law.
- * Unauthorized copying, distribution, or disclosure of this content
- * is strictly prohibited without prior written consent from the author or
- * copyright owner.
- *
- * For the full copyright and license information, please view the LICENSE.md
- * file that was distributed with this source code.
- */
-
 namespace App\Infrastructure\Repository;
 
 use App\Domain\Entity\WorkoutExercise;
@@ -114,11 +102,10 @@ final class WorkoutExerciseRepository extends ServiceEntityRepository implements
 
         $results = $qb->getQuery()->getResult();
 
-        // Mapuj wyniki i konwertuj wagę z gramów na kg
         return array_map(
             fn (array $row) => [
                 'date' => $row['date'],
-                'sessionId' => (string) $row['sessionId'], // Konwertuj UUID na string
+                'sessionId' => (string) $row['sessionId'],
                 'maxWeightKg' => (float) $row['maxWeightGrams'] / 1000,
             ],
             $results

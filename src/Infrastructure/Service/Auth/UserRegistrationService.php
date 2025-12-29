@@ -2,18 +2,6 @@
 
 declare(strict_types=1);
 
-/*
- * This file is part of the proprietary project.
- *
- * This file and its contents are confidential and protected by copyright law.
- * Unauthorized copying, distribution, or disclosure of this content
- * is strictly prohibited without prior written consent from the author or
- * copyright owner.
- *
- * For the full copyright and license information, please view the LICENSE.md
- * file that was distributed with this source code.
- */
-
 namespace App\Infrastructure\Service\Auth;
 
 use App\Domain\Entity\User;
@@ -38,7 +26,6 @@ final readonly class UserRegistrationService implements UserRegistrationServiceI
             'email' => $email,
         ]);
 
-        // Check if email already exists
         if ($this->userRepository->findByEmail($email)) {
             $this->logger->warning('Registration failed - email already exists', [
                 'email' => $email,
@@ -46,17 +33,14 @@ final readonly class UserRegistrationService implements UserRegistrationServiceI
             throw new EmailAlreadyExistsException($email);
         }
 
-        // Create user entity
         $user = User::create($email);
 
-        // Hash password
         $hashedPassword = $this->passwordHasher->hashPassword(
             $user,
             $plainPassword
         );
         $user->setPasswordHash($hashedPassword);
 
-        // Save to database
         try {
             $this->userRepository->save($user);
         } catch (\Exception $e) {

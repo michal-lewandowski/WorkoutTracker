@@ -2,18 +2,6 @@
 
 declare(strict_types=1);
 
-/*
- * This file is part of the proprietary project.
- *
- * This file and its contents are confidential and protected by copyright law.
- * Unauthorized copying, distribution, or disclosure of this content
- * is strictly prohibited without prior written consent from the author or
- * copyright owner.
- *
- * For the full copyright and license information, please view the LICENSE.md
- * file that was distributed with this source code.
- */
-
 namespace App\Infrastructure\Controller\WorkoutSession;
 
 use App\Application\Command\WorkoutSession\UpdateWorkoutSessionCommand;
@@ -49,10 +37,8 @@ final class UpdateWorkoutSessionController extends AbstractController
         /** @var User $user */
         $user = $this->getUser();
 
-        // Konwersja daty z string na DateTimeImmutable
         $date = new \DateTimeImmutable($requestDto->date);
 
-        // Utworzenie i wykonanie commanda
         $command = new UpdateWorkoutSessionCommand(
             id: $id,
             userId: $user->getId(),
@@ -64,10 +50,8 @@ final class UpdateWorkoutSessionController extends AbstractController
         $this->handler->handle($command);
         $updatedWorkoutSession = $this->workoutSessionRepository->findById($command->id);
 
-        // Mapowanie WorkoutExercises na DTOs
         $workoutExerciseDtos = [];
         foreach ($updatedWorkoutSession->getWorkoutExercises() as $workoutExercise) {
-            // Mapowanie ExerciseSets na DTOs
             $exerciseSetDtos = [];
             foreach ($workoutExercise->getExerciseSets() as $exerciseSet) {
                 $exerciseSetDtos[] = new ExerciseSetDto(

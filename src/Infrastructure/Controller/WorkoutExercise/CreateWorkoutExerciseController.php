@@ -2,18 +2,6 @@
 
 declare(strict_types=1);
 
-/*
- * This file is part of the proprietary project.
- *
- * This file and its contents are confidential and protected by copyright law.
- * Unauthorized copying, distribution, or disclosure of this content
- * is strictly prohibited without prior written consent from the author or
- * copyright owner.
- *
- * For the full copyright and license information, please view the LICENSE.md
- * file that was distributed with this source code.
- */
-
 namespace App\Infrastructure\Controller\WorkoutExercise;
 
 use App\Application\Command\WorkoutExercise\CreateWorkoutExerciseCommand;
@@ -48,7 +36,6 @@ final class CreateWorkoutExerciseController extends AbstractController
         /** @var User $user */
         $user = $this->getUser();
 
-        // Przygotowanie danych sets (konwersja DTO do array)
         $sets = null;
         if (null !== $requestDto->sets) {
             $sets = array_map(
@@ -61,7 +48,6 @@ final class CreateWorkoutExerciseController extends AbstractController
             );
         }
 
-        // Utworzenie commanda
         $command = new CreateWorkoutExerciseCommand(
             id: Uuid::v4(),
             userId: $user->getId(),
@@ -70,12 +56,10 @@ final class CreateWorkoutExerciseController extends AbstractController
             sets: $sets
         );
 
-        // Wykonanie commanda
         $this->handler->handle($command);
 
         $workoutExercise = $this->workoutExerciseRepository->findById((string) $command->id);
 
-        // Mapowanie encji na DTO
         $exercise = $workoutExercise->getExercise();
         $exerciseSummaryDto = new ExerciseSummaryDto(
             id: $exercise->getId(),

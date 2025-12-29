@@ -1,23 +1,10 @@
 # WorkoutTracker
 
-## Table of Contents
-- [Project Name](#project-name)
-- [Project Description](#project-description)
-- [Tech Stack](#tech-stack)
-- [Getting Started Locally](#getting-started-locally)
-- [Available Scripts](#available-scripts)
-- [Project Scope](#project-scope)
-- [Project Status](#project-status)
-- [License](#license)
-
-## Project Name
-**WorkoutTracker**
-
 ## Project Description
 WorkoutTracker is a responsive web application designed for tracking resistance training sessions. The application aims to simplify the process of recording workouts by allowing users to create sessions on-the-go, log exercises with multiple series, and visualize progress through dynamic statistical charts. Whether you are a beginner looking for a simple tracking tool or an intermediate user needing detailed insights into your training routines, WorkoutTracker provides a fast, mobile-first solution for managing your workout history.
 
 ## Tech Stack
-- **Backend:** Symfony 7.3 (PHP 8.4), Doctrine ORM, Nelmio CORS Bundle
+- **Backend:** Symfony 7.3 (PHP 8.4), Doctrine ORM
 - **Frontend:** Next.js, React, TypeScript
 - **Database:** PostgreSQL
 - **API Documentation:** Swagger
@@ -28,7 +15,6 @@ Follow these steps to set up the project on your local machine:
 ### Prerequisites
 - Docker and Docker Compose installed on your system
 - Make installed on your system
-
 ### Setting Up the Development Environment
 
 1. Clone the repository
@@ -60,42 +46,15 @@ Follow these steps to set up the project on your local machine:
 ### Available Make Commands
 
 ```bash
-# Build all containers
-make build
-
-# Start all containers in production mode
-make start
-
-# Start all containers in development mode
-make start-dev
-
-# Stop all containers
-make stop
-
-# Restart all containers
-make restart
-
-# Remove all containers and images
-make clean
-
-# Show running containers
-make ps
-
-# Display logs from all containers
-make logs
-
-# Open shell in PHP container
-make shell-php
-
-# Open shell in frontend container
-make shell-frontend
-
-# Open shell in database container
-make shell-db
-
-# Run PHP linter
-make lint
-
-# Run tests
-make test
+WorkoutTracker Makefile Commands:
+--------------------------------
+make build         - Build all containers (backend, frontend, nginx)
+make start         - Start all containers in detached mode
+make start-dev     - Start all containers in development mode
+make stop          - Stop all containers
+make restart       - Restart all containers
+make clean         - Remove all containers and images
+make lint          - Run PHP linter
+make test          - Run tests
+make e2e           - Run e2e tests
 ```

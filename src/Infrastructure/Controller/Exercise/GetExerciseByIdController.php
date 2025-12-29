@@ -2,18 +2,6 @@
 
 declare(strict_types=1);
 
-/*
- * This file is part of the proprietary project.
- *
- * This file and its contents are confidential and protected by copyright law.
- * Unauthorized copying, distribution, or disclosure of this content
- * is strictly prohibited without prior written consent from the author or
- * copyright owner.
- *
- * For the full copyright and license information, please view the LICENSE.md
- * file that was distributed with this source code.
- */
-
 namespace App\Infrastructure\Controller\Exercise;
 
 use App\Domain\Repository\ExerciseRepositoryInterface;
@@ -38,7 +26,6 @@ final class GetExerciseByIdController extends AbstractController
     public function __invoke(string $id): JsonResponse
     {
         try {
-            // Validate UUID format
             if (!Uuid::isValid($id)) {
                 return $this->json([
                     'error' => 'Invalid exercise ID format',
@@ -46,7 +33,6 @@ final class GetExerciseByIdController extends AbstractController
                 ], Response::HTTP_BAD_REQUEST);
             }
 
-            // Find exercise
             $exercise = $this->exerciseRepository->findById($id);
 
             if (null === $exercise) {
@@ -58,7 +44,6 @@ final class GetExerciseByIdController extends AbstractController
                 ], Response::HTTP_NOT_FOUND);
             }
 
-            // Transform to DTO (default language: pl)
             $exerciseDto = ExerciseDto::fromEntity($exercise, lang: 'pl');
 
             return $this->json($exerciseDto, Response::HTTP_OK);
