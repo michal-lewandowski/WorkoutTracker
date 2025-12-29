@@ -22,13 +22,14 @@ use App\Domain\Repository\WorkoutSessionRepositoryInterface;
 final readonly class CreateWorkoutSessionHandler
 {
     public function __construct(
-        private WorkoutSessionRepositoryInterface $workoutSessionRepository
+        private WorkoutSessionRepositoryInterface $workoutSessionRepository,
     ) {
     }
 
-    public function handle(CreateWorkoutSessionCommand $command): WorkoutSession
+    public function handle(CreateWorkoutSessionCommand $command): void
     {
         $workoutSession = WorkoutSession::create(
+            id: $command->id,
             user: $command->user,
             date: $command->date,
             name: $command->name,
@@ -36,8 +37,5 @@ final readonly class CreateWorkoutSessionHandler
         );
 
         $this->workoutSessionRepository->save($workoutSession);
-
-        return $workoutSession;
     }
 }
-

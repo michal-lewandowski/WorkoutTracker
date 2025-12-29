@@ -23,10 +23,8 @@ final readonly class GetExerciseStatisticsQueryDto
     public function __construct(
         #[Assert\Date(message: 'Date from must be a valid date')]
         public ?string $dateFrom = null,
-
         #[Assert\Date(message: 'Date to must be a valid date')]
         public ?string $dateTo = null,
-
         #[Assert\Range(
             min: 1,
             max: 1000,
@@ -36,4 +34,3 @@ final readonly class GetExerciseStatisticsQueryDto
     ) {
     }
 }
-

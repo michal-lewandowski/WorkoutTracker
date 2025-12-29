@@ -19,6 +19,7 @@ namespace App\Infrastructure\Controller\WorkoutSession;
 use App\Application\Command\WorkoutSession\CreateWorkoutSessionCommand;
 use App\Application\Command\WorkoutSession\CreateWorkoutSessionHandler;
 use App\Domain\Entity\User;
+use App\Domain\Repository\WorkoutSessionRepositoryInterface;
 use App\Infrastructure\Api\Input\CreateWorkoutSessionRequestDto;
 use App\Infrastructure\Api\Output\WorkoutSessionDetailDto;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -27,18 +28,20 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Component\Uid\Uuid;
 
 #[Route('/api/v1/workout-sessions', name: 'create_workout_session', methods: ['POST'])]
 #[IsGranted('IS_AUTHENTICATED_FULLY')]
 final class CreateWorkoutSessionController extends AbstractController
 {
     public function __construct(
-        private readonly CreateWorkoutSessionHandler $handler
+        private readonly WorkoutSessionRepositoryInterface $workoutSessionRepository,
+        private readonly CreateWorkoutSessionHandler $handler,
     ) {
     }
 
     public function __invoke(
-        #[MapRequestPayload] CreateWorkoutSessionRequestDto $requestDto
+        #[MapRequestPayload] CreateWorkoutSessionRequestDto $requestDto,
     ): JsonResponse {
         /** @var User $user */
         $user = $this->getUser();
@@ -48,6 +51,7 @@ final class CreateWorkoutSessionController extends AbstractController
 
         // Utworzenie commanda
         $command = new CreateWorkoutSessionCommand(
+            id: Uuid::v4(),
             user: $user,
             date: $date,
             name: $requestDto->name,
@@ -55,7 +59,8 @@ final class CreateWorkoutSessionController extends AbstractController
         );
 
         // Wykonanie commanda
-        $workoutSession = $this->handler->handle($command);
+        $this->handler->handle($command);
+        $workoutSession = $this->workoutSessionRepository->findById((string) $command->id);
 
         // Mapowanie encji na DTO
         $responseDto = new WorkoutSessionDetailDto(
@@ -72,4 +77,3 @@ final class CreateWorkoutSessionController extends AbstractController
         return $this->json($responseDto, Response::HTTP_CREATED);
     }
 }
-

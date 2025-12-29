@@ -29,8 +29,7 @@ final readonly class WorkoutSessionDetailDto
         public ?string $notes,
         public array $workoutExercises,
         public \DateTimeImmutable $createdAt,
-        public \DateTimeImmutable $updatedAt
+        public \DateTimeImmutable $updatedAt,
     ) {
     }
 }
-

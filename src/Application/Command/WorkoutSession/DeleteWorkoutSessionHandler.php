@@ -21,7 +21,7 @@ use App\Domain\Repository\WorkoutSessionRepositoryInterface;
 final readonly class DeleteWorkoutSessionHandler
 {
     public function __construct(
-        private WorkoutSessionRepositoryInterface $workoutSessionRepository
+        private WorkoutSessionRepositoryInterface $workoutSessionRepository,
     ) {
     }
 
@@ -32,4 +32,3 @@ final readonly class DeleteWorkoutSessionHandler
         $this->workoutSessionRepository->save($command->workoutSession);
     }
 }
-

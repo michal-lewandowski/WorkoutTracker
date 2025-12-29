@@ -22,8 +22,7 @@ final readonly class ExerciseSummaryDto
         public string $id,
         public string $name,
         public ?string $nameEn,
-        public string $muscleCategoryId
+        public string $muscleCategoryId,
     ) {
     }
 }
-

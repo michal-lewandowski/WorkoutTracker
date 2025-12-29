@@ -16,14 +16,15 @@ declare(strict_types=1);
 
 namespace App\Application\Command\WorkoutExercise;
 
-use App\Application\Exception\WorkoutExerciseNotFoundException;
+use App\Domain\Exception\WorkoutExerciseNotFoundException;
 use App\Domain\Repository\WorkoutExerciseRepositoryInterface;
 
 final readonly class DeleteWorkoutExerciseHandler
 {
     public function __construct(
         private WorkoutExerciseRepositoryInterface $workoutExerciseRepository,
-    ) {}
+    ) {
+    }
 
     public function handle(DeleteWorkoutExerciseCommand $command): void
     {
@@ -44,4 +45,3 @@ final readonly class DeleteWorkoutExerciseHandler
         $this->workoutExerciseRepository->flush();
     }
 }
-

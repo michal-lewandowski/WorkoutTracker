@@ -735,6 +735,7 @@ final class EmailAlreadyExistsException extends \DomainException
 
 ### Krok 8: Implementacja Service (Infrastructure)
 **Plik**: `src/Infrastructure/Service/Auth/UserRegistrationService.php`
+
 ```php
 <?php
 
@@ -742,16 +743,7 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Service\Auth;
 
-use App\Application\Command\Auth\RegisterUserCommand;
-use App\Application\Exception\EmailAlreadyExistsException;
-use App\Domain\Entity\User;
-use App\Domain\Repository\UserRepositoryInterface;
-use App\Domain\Service\UserRegistrationServiceInterface;
-use App\Infrastructure\Api\Output\AuthResponseDto;
-use App\Infrastructure\Api\Output\UserDto;
-use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
-use Psr\Log\LoggerInterface;
-use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use App\Application\Command\Auth\RegisterUserCommand;use App\Domain\Entity\User;use App\Domain\Exception\EmailAlreadyExistsException;use App\Domain\Repository\UserRepositoryInterface;use App\Domain\Service\UserRegistrationServiceInterface;use App\Infrastructure\Api\Output\AuthResponseDto;use App\Infrastructure\Api\Output\UserDto;use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;use Psr\Log\LoggerInterface;use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 final readonly class UserRegistrationService implements UserRegistrationServiceInterface
 {
@@ -823,6 +815,7 @@ final readonly class UserRegistrationService implements UserRegistrationServiceI
 
 ### Krok 9: Implementacja Controller
 **Plik**: `src/Infrastructure/Controller/Auth/RegisterController.php`
+
 ```php
 <?php
 
@@ -830,16 +823,7 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Controller\Auth;
 
-use App\Application\Command\Auth\RegisterUserCommand;
-use App\Application\Exception\EmailAlreadyExistsException;
-use App\Domain\Service\UserRegistrationServiceInterface;
-use App\Infrastructure\Api\Input\RegisterRequestDto;
-use App\Infrastructure\Api\Output\ValidationErrorDto;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
-use Symfony\Component\Routing\Attribute\Route;
+use App\Application\Command\Auth\RegisterUserCommand;use App\Domain\Exception\EmailAlreadyExistsException;use App\Domain\Service\UserRegistrationServiceInterface;use App\Infrastructure\Api\Input\RegisterRequestDto;use App\Infrastructure\Api\Output\ValidationErrorDto;use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;use Symfony\Component\HttpFoundation\JsonResponse;use Symfony\Component\HttpFoundation\Response;use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;use Symfony\Component\Routing\Attribute\Route;
 
 final class RegisterController extends AbstractController
 {
@@ -899,6 +883,7 @@ services:
 
 ### Krok 11: Testy jednostkowe
 **Plik**: `tests/Unit/Infrastructure/Service/Auth/UserRegistrationServiceTest.php`
+
 ```php
 <?php
 
@@ -906,15 +891,7 @@ declare(strict_types=1);
 
 namespace App\Tests\Unit\Infrastructure\Service\Auth;
 
-use App\Application\Command\Auth\RegisterUserCommand;
-use App\Application\Exception\EmailAlreadyExistsException;
-use App\Domain\Entity\User;
-use App\Domain\Repository\UserRepositoryInterface;
-use App\Infrastructure\Service\Auth\UserRegistrationService;
-use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
-use PHPUnit\Framework\TestCase;
-use Psr\Log\LoggerInterface;
-use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use App\Application\Command\Auth\RegisterUserCommand;use App\Domain\Entity\User;use App\Domain\Exception\EmailAlreadyExistsException;use App\Domain\Repository\UserRepositoryInterface;use App\Infrastructure\Service\Auth\UserRegistrationService;use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;use PHPUnit\Framework\TestCase;use Psr\Log\LoggerInterface;use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 final class UserRegistrationServiceTest extends TestCase
 {
@@ -942,14 +919,14 @@ final class UserRegistrationServiceTest extends TestCase
     public function testSuccessfulRegistration(): void
     {
         $command = new RegisterUserCommand(
-            email: 'test@example.com',
+            email: 'test@test.com',
             plainPassword: 'SecurePass123'
         );
         
         $this->userRepository
             ->expects($this->once())
             ->method('findByEmail')
-            ->with('test@example.com')
+            ->with('test@test.com')
             ->willReturn(null);
         
         $this->passwordHasher
@@ -968,7 +945,7 @@ final class UserRegistrationServiceTest extends TestCase
         
         $result = $this->service->register($command);
         
-        $this->assertSame('test@example.com', $result->user->email);
+        $this->assertSame('test@test.com', $result->user->email);
         $this->assertSame('jwt.token.here', $result->token);
     }
     
@@ -1066,7 +1043,7 @@ final class RegisterControllerTest extends WebTestCase
             uri: '/api/v1/auth/register',
             server: ['CONTENT_TYPE' => 'application/json'],
             content: json_encode([
-                'email' => 'test@example.com',
+                'email' => 'test@test.com',
                 'password' => 'weak',
                 'passwordConfirmation' => 'weak'
             ])
@@ -1089,7 +1066,7 @@ final class RegisterControllerTest extends WebTestCase
             uri: '/api/v1/auth/register',
             server: ['CONTENT_TYPE' => 'application/json'],
             content: json_encode([
-                'email' => 'test@example.com',
+                'email' => 'test@test.com',
                 'password' => 'SecurePass123',
                 'passwordConfirmation' => 'DifferentPass456'
             ])
@@ -1137,7 +1114,7 @@ vendor/bin/php-cs-fixer fix tests/
 curl -X POST http://localhost/api/v1/auth/register \
   -H "Content-Type: application/json" \
   -d '{
-    "email": "test@example.com",
+    "email": "test@test.com",
     "password": "SecurePass123",
     "passwordConfirmation": "SecurePass123"
   }'
@@ -1146,7 +1123,7 @@ curl -X POST http://localhost/api/v1/auth/register \
 # {
 #   "user": {
 #     "id": "01ARZ3NDEKTSV4RRFFQ69G5FAV",
-#     "email": "test@example.com",
+#     "email": "test@test.com",
 #     "createdAt": "2025-10-11T10:30:00+00:00"
 #   },
 #   "token": "eyJhbGci..."
@@ -1156,7 +1133,7 @@ curl -X POST http://localhost/api/v1/auth/register \
 curl -X POST http://localhost/api/v1/auth/register \
   -H "Content-Type: application/json" \
   -d '{
-    "email": "test@example.com",
+    "email": "test@test.com",
     "password": "SecurePass123",
     "passwordConfirmation": "SecurePass123"
   }'
@@ -1175,12 +1152,12 @@ curl -X POST http://localhost/api/v1/auth/register \
 -- Check created user
 SELECT id, email, created_at, updated_at 
 FROM users 
-WHERE email = 'test@example.com';
+WHERE email = 'test@test.com';
 
 -- Verify password is hashed
 SELECT LENGTH(password_hash) as hash_length 
 FROM users 
-WHERE email = 'test@example.com';
+WHERE email = 'test@test.com';
 -- Should return ~60 for bcrypt or ~95 for argon2
 ```
 
@@ -1225,7 +1202,7 @@ php bin/console lexik:jwt:generate-keypair
 # Test endpoint
 curl -X POST http://localhost/api/v1/auth/register \
   -H "Content-Type: application/json" \
-  -d '{"email":"test@example.com","password":"SecurePass123","passwordConfirmation":"SecurePass123"}'
+  -d '{"email":"test@test.com","password":"SecurePass123","passwordConfirmation":"SecurePass123"}'
 ```
 
 ---

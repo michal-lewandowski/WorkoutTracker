@@ -16,9 +16,8 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Service\Auth;
 
-use App\Application\Command\Auth\RegisterUserCommand;
-use App\Application\Exception\EmailAlreadyExistsException;
 use App\Domain\Entity\User;
+use App\Domain\Exception\EmailAlreadyExistsException;
 use App\Domain\Repository\UserRepositoryInterface;
 use App\Domain\Service\UserRegistrationServiceInterface;
 use Psr\Log\LoggerInterface;
@@ -33,27 +32,27 @@ final readonly class UserRegistrationService implements UserRegistrationServiceI
     ) {
     }
 
-    public function register(RegisterUserCommand $command): void
+    public function register(string $email, string $plainPassword): void
     {
         $this->logger->info('User registration attempt', [
-            'email' => $command->email,
+            'email' => $email,
         ]);
 
         // Check if email already exists
-        if ($this->userRepository->findByEmail($command->email)) {
+        if ($this->userRepository->findByEmail($email)) {
             $this->logger->warning('Registration failed - email already exists', [
-                'email' => $command->email,
+                'email' => $email,
             ]);
-            throw new EmailAlreadyExistsException($command->email);
+            throw new EmailAlreadyExistsException($email);
         }
 
         // Create user entity
-        $user = User::create($command->email);
+        $user = User::create($email);
 
         // Hash password
         $hashedPassword = $this->passwordHasher->hashPassword(
             $user,
-            $command->plainPassword
+            $plainPassword
         );
         $user->setPasswordHash($hashedPassword);
 
@@ -62,7 +61,7 @@ final readonly class UserRegistrationService implements UserRegistrationServiceI
             $this->userRepository->save($user);
         } catch (\Exception $e) {
             $this->logger->error('Failed to save user to database', [
-                'email' => $command->email,
+                'email' => $email,
                 'error' => $e->getMessage(),
             ]);
             throw new \RuntimeException('Failed to create user account');

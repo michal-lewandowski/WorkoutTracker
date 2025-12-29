@@ -24,12 +24,9 @@ final readonly class CreateWorkoutSessionRequestDto
         #[Assert\NotBlank]
         #[Assert\Date]
         public string $date,
-
         #[Assert\Length(max: 255)]
         public ?string $name = null,
-
-        public ?string $notes = null
+        public ?string $notes = null,
     ) {
     }
 }
-

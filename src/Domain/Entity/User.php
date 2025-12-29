@@ -25,14 +25,13 @@ use Symfony\Component\Uid\Uuid;
 
 #[ORM\Entity]
 #[ORM\Table(name: 'users')]
-#[ORM\Index(name: 'idx_users_email_lower', columns: ['email'])]
-final class User implements UserInterface, PasswordAuthenticatedUserInterface
+class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
     #[ORM\Column(type: 'uuid', unique: true)]
     private string $id;
 
-    #[ORM\Column(type: 'string', length: 255, nullable: false)]
+    #[ORM\Column(type: 'string', length: 255, nullable: false, unique: true)]
     private string $email;
 
     #[ORM\Column(name: 'password_hash', type: 'string', length: 255, nullable: false)]

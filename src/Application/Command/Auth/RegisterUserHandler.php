@@ -14,13 +14,18 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-namespace App\Application\Exception;
+namespace App\Application\Command\Auth;
 
-final class WorkoutSessionAccessDeniedException extends \RuntimeException
+use App\Domain\Service\UserRegistrationServiceInterface;
+
+final readonly class RegisterUserHandler
 {
-    public function __construct()
+    public function __construct(private UserRegistrationServiceInterface $registrationService)
     {
-        parent::__construct('Access denied to this workout session');
+    }
+
+    public function handle(RegisterUserCommand $command): void
+    {
+        $this->registrationService->register($command->email, $command->plainPassword);
     }
 }
-

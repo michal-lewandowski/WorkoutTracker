@@ -23,8 +23,7 @@ final readonly class DeleteWorkoutSessionCommand
 {
     public function __construct(
         public WorkoutSession $workoutSession,
-        public User $deletedBy
+        public User $deletedBy,
     ) {
     }
 }
-

@@ -18,8 +18,8 @@ namespace App\Infrastructure\Controller\WorkoutSession;
 
 use App\Application\Command\WorkoutSession\DeleteWorkoutSessionCommand;
 use App\Application\Command\WorkoutSession\DeleteWorkoutSessionHandler;
-use App\Application\Exception\WorkoutSessionNotFoundException;
 use App\Domain\Entity\User;
+use App\Domain\Exception\WorkoutSessionNotFoundException;
 use App\Domain\Repository\WorkoutSessionRepositoryInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -33,7 +33,7 @@ final class DeleteWorkoutSessionController extends AbstractController
 {
     public function __construct(
         private readonly WorkoutSessionRepositoryInterface $workoutSessionRepository,
-        private readonly DeleteWorkoutSessionHandler $handler
+        private readonly DeleteWorkoutSessionHandler $handler,
     ) {
     }
 
@@ -49,7 +49,7 @@ final class DeleteWorkoutSessionController extends AbstractController
         );
 
         if (null === $workoutSession) {
-            throw new WorkoutSessionNotFoundException($id);
+            throw WorkoutSessionNotFoundException::withId($id);
         }
 
         // Utworzenie i wykonanie commanda
@@ -63,4 +63,3 @@ final class DeleteWorkoutSessionController extends AbstractController
         return $this->json(null, Response::HTTP_NO_CONTENT);
     }
 }
-

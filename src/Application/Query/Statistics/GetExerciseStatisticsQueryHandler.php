@@ -14,9 +14,9 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-namespace App\Application\Command\Statistics;
+namespace App\Application\Query\Statistics;
 
-use App\Application\Exception\ExerciseNotFoundException;
+use App\Domain\Exception\ExerciseNotFoundException;
 use App\Domain\Repository\ExerciseRepositoryInterface;
 use App\Domain\Repository\WorkoutExerciseRepositoryInterface;
 use App\Domain\Service\StatisticsCalculator;
@@ -25,7 +25,7 @@ use App\Infrastructure\Api\Output\ExerciseStatisticsDataPointDto;
 use App\Infrastructure\Api\Output\ExerciseStatisticsDto;
 use App\Infrastructure\Api\Output\ExerciseStatisticsSummaryDto;
 
-final readonly class GetExerciseStatisticsHandler
+final readonly class GetExerciseStatisticsQueryHandler
 {
     public function __construct(
         private ExerciseRepositoryInterface $exerciseRepository,
@@ -34,7 +34,7 @@ final readonly class GetExerciseStatisticsHandler
     ) {
     }
 
-    public function handle(GetExerciseStatisticsCommand $command): ExerciseStatisticsDto
+    public function handle(GetExerciseStatisticsQuery $command): ExerciseStatisticsDto
     {
         // Sprawdź czy ćwiczenie istnieje
         $exercise = $this->exerciseRepository->findById($command->exerciseId);
@@ -96,4 +96,3 @@ final readonly class GetExerciseStatisticsHandler
         );
     }
 }
-

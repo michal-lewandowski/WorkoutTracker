@@ -16,8 +16,8 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Controller\Statistics;
 
-use App\Application\Command\Statistics\GetExerciseStatisticsCommand;
-use App\Application\Command\Statistics\GetExerciseStatisticsHandler;
+use App\Application\Query\Statistics\GetExerciseStatisticsQuery;
+use App\Application\Query\Statistics\GetExerciseStatisticsQueryHandler;
 use App\Domain\Entity\User;
 use App\Infrastructure\Api\Input\GetExerciseStatisticsQueryDto;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -33,7 +33,7 @@ use Symfony\Component\Uid\Uuid;
 final class GetExerciseStatisticsController extends AbstractController
 {
     public function __construct(
-        private readonly GetExerciseStatisticsHandler $handler,
+        private readonly GetExerciseStatisticsQueryHandler $handler,
     ) {
     }
 
@@ -65,7 +65,7 @@ final class GetExerciseStatisticsController extends AbstractController
             : null;
 
         // Utworzenie komendy
-        $command = new GetExerciseStatisticsCommand(
+        $command = new GetExerciseStatisticsQuery(
             exerciseId: $exerciseId,
             userId: $user->getId(),
             dateFrom: $dateFrom,
@@ -79,4 +79,3 @@ final class GetExerciseStatisticsController extends AbstractController
         return $this->json($statistics, Response::HTTP_OK);
     }
 }
-

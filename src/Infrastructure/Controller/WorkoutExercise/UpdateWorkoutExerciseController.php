@@ -19,6 +19,7 @@ namespace App\Infrastructure\Controller\WorkoutExercise;
 use App\Application\Command\WorkoutExercise\UpdateWorkoutExerciseCommand;
 use App\Application\Command\WorkoutExercise\UpdateWorkoutExerciseHandler;
 use App\Domain\Entity\User;
+use App\Domain\Repository\WorkoutExerciseRepositoryInterface;
 use App\Infrastructure\Api\Input\UpdateWorkoutExerciseRequestDto;
 use App\Infrastructure\Api\Output\ExerciseSetDto;
 use App\Infrastructure\Api\Output\ExerciseSummaryDto;
@@ -35,12 +36,14 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 final class UpdateWorkoutExerciseController extends AbstractController
 {
     public function __construct(
-        private readonly UpdateWorkoutExerciseHandler $handler
-    ) {}
+        private readonly UpdateWorkoutExerciseHandler $handler,
+        private readonly WorkoutExerciseRepositoryInterface $workoutExerciseRepository,
+    ) {
+    }
 
     public function __invoke(
         string $id,
-        #[MapRequestPayload] UpdateWorkoutExerciseRequestDto $requestDto
+        #[MapRequestPayload] UpdateWorkoutExerciseRequestDto $requestDto,
     ): JsonResponse {
         /** @var User $user */
         $user = $this->getUser();
@@ -63,7 +66,9 @@ final class UpdateWorkoutExerciseController extends AbstractController
         );
 
         // Wykonanie commanda
-        $workoutExercise = $this->handler->handle($command);
+        $this->handler->handle($command);
+
+        $workoutExercise = $this->workoutExerciseRepository->findById($command->workoutExerciseId);
 
         // Mapowanie encji na DTO
         $exercise = $workoutExercise->getExercise();
@@ -98,4 +103,3 @@ final class UpdateWorkoutExerciseController extends AbstractController
         return $this->json($responseDto, Response::HTTP_OK);
     }
 }
-

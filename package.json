@@ -1,0 +1,35 @@
+{
+  "name": "workouttracker",
+  "version": "1.0.0",
+  "description": "- [Project Name](#project-name) - [Project Description](#project-description) - [Tech Stack](#tech-stack) - [Getting Started Locally](#getting-started-locally) - [Available Scripts](#available-scripts) - [Project Scope](#project-scope) - [Project Status](#project-status) - [License](#license)",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs",
+    "test": "tests"
+  },
+  "scripts": {
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:headed": "playwright test --headed",
+    "test:e2e:debug": "playwright test --debug",
+    "test:e2e:report": "playwright show-report",
+    "test:e2e:smoke": "playwright test smoke.spec.ts",
+    "test:e2e:auth": "playwright test auth.spec.ts",
+    "test:e2e:sessions": "playwright test workout-session.spec.ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/michal-lewandowski/WorkoutTracker.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/michal-lewandowski/WorkoutTracker/issues"
+  },
+  "homepage": "https://github.com/michal-lewandowski/WorkoutTracker#readme",
+  "devDependencies": {
+    "@playwright/test": "^1.57.0",
+    "@types/node": "^24.10.1"
+  }
+}

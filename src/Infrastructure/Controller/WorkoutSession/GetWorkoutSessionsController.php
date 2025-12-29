@@ -33,12 +33,12 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 final class GetWorkoutSessionsController extends AbstractController
 {
     public function __construct(
-        private readonly WorkoutSessionRepositoryInterface $workoutSessionRepository
+        private readonly WorkoutSessionRepositoryInterface $workoutSessionRepository,
     ) {
     }
 
     public function __invoke(
-        #[MapQueryString] GetWorkoutSessionsQueryDto $queryDto
+        #[MapQueryString] GetWorkoutSessionsQueryDto $queryDto,
     ): JsonResponse {
         /** @var User $user */
         $user = $this->getUser();
@@ -93,4 +93,3 @@ final class GetWorkoutSessionsController extends AbstractController
         return $this->json($responseDto, Response::HTTP_OK);
     }
 }
-

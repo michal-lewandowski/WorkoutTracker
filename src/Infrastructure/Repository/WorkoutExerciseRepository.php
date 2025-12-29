@@ -33,7 +33,9 @@ final class WorkoutExerciseRepository extends ServiceEntityRepository implements
 
     public function save(WorkoutExercise $workoutExercise): void
     {
-        $this->getEntityManager()->persist($workoutExercise);
+        $em = $this->getEntityManager();
+        $em->persist($workoutExercise);
+        $em->flush();
     }
 
     public function findById(string $id, ?string $userId = null): ?WorkoutExercise
@@ -74,7 +76,7 @@ final class WorkoutExerciseRepository extends ServiceEntityRepository implements
         string $userId,
         ?\DateTimeImmutable $dateFrom = null,
         ?\DateTimeImmutable $dateTo = null,
-        ?int $limit = 100
+        ?int $limit = 100,
     ): array {
         $qb = $this->createQueryBuilder('we')
             ->select(
@@ -123,4 +125,3 @@ final class WorkoutExerciseRepository extends ServiceEntityRepository implements
         );
     }
 }
-

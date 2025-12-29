@@ -25,7 +25,7 @@ use Symfony\Component\Uid\Uuid;
 #[ORM\Table(name: 'muscle_categories')]
 #[ORM\UniqueConstraint(name: 'idx_muscle_categories_name_pl', columns: ['name_pl'])]
 #[ORM\UniqueConstraint(name: 'idx_muscle_categories_name_en', columns: ['name_en'])]
-final class MuscleCategory
+class MuscleCategory
 {
     #[ORM\Id]
     #[ORM\Column(type: 'uuid', unique: true)]

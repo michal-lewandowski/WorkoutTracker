@@ -36,7 +36,7 @@ final class MuscleCategoryRepository extends ServiceEntityRepository implements 
      */
     public function findAll(): array
     {
-        /** @var array<int, MuscleCategory> */
+        /* @var array<int, MuscleCategory> */
         return $this->createQueryBuilder('mc')
             ->orderBy('mc.namePl', 'ASC')
             ->getQuery()
@@ -55,6 +55,6 @@ final class MuscleCategoryRepository extends ServiceEntityRepository implements 
         } catch (\Throwable $e) {
             dd($e);
         }
-        /** @var MuscleCategory|null */
+        /* @var MuscleCategory|null */
     }
 }

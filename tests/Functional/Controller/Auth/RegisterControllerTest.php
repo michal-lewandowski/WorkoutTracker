@@ -113,7 +113,7 @@ final class RegisterControllerTest extends WebTestCase
             uri: '/api/v1/auth/register',
             server: ['CONTENT_TYPE' => 'application/json'],
             content: json_encode([
-                'email' => 'test@example.com',
+                'email' => 'test@test.com',
                 'password' => 'weak',
                 'passwordConfirmation' => 'weak'
             ])
@@ -137,7 +137,7 @@ final class RegisterControllerTest extends WebTestCase
             uri: '/api/v1/auth/register',
             server: ['CONTENT_TYPE' => 'application/json'],
             content: json_encode([
-                'email' => 'test@example.com',
+                'email' => 'test@test.com',
                 'password' => 'SecurePass123',
                 'passwordConfirmation' => 'DifferentPass456'
             ])
@@ -160,7 +160,7 @@ final class RegisterControllerTest extends WebTestCase
             uri: '/api/v1/auth/register',
             server: ['CONTENT_TYPE' => 'application/json'],
             content: json_encode([
-                'email' => 'test@example.com'
+                'email' => 'test@test.com'
                 // Missing password and passwordConfirmation
             ])
         );

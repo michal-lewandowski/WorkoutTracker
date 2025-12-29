@@ -16,8 +16,8 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Controller\WorkoutSession;
 
-use App\Application\Exception\WorkoutSessionNotFoundException;
 use App\Domain\Entity\User;
+use App\Domain\Exception\WorkoutSessionNotFoundException;
 use App\Domain\Repository\WorkoutSessionRepositoryInterface;
 use App\Infrastructure\Api\Output\ExerciseSetDto;
 use App\Infrastructure\Api\Output\ExerciseSummaryDto;
@@ -34,7 +34,7 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 final class GetWorkoutSessionController extends AbstractController
 {
     public function __construct(
-        private readonly WorkoutSessionRepositoryInterface $workoutSessionRepository
+        private readonly WorkoutSessionRepositoryInterface $workoutSessionRepository,
     ) {
     }
 
@@ -50,7 +50,7 @@ final class GetWorkoutSessionController extends AbstractController
         );
 
         if (null === $workoutSession) {
-            throw new WorkoutSessionNotFoundException($id);
+            throw WorkoutSessionNotFoundException::withId($id);
         }
 
         // Mapowanie WorkoutExercises na DTOs
@@ -98,4 +98,3 @@ final class GetWorkoutSessionController extends AbstractController
         return $this->json($responseDto, Response::HTTP_OK);
     }
 }
-

@@ -26,7 +26,7 @@ use Symfony\Component\Uid\Uuid;
 #[ORM\Index(name: 'idx_workout_sessions_user_id_date', columns: ['user_id', 'date'])]
 #[ORM\Index(name: 'idx_workout_sessions_deleted_by', columns: ['deleted_by'])]
 #[ORM\Index(name: 'idx_workout_sessions_active', columns: ['user_id', 'date'])]
-final class WorkoutSession
+class WorkoutSession
 {
     #[ORM\Id]
     #[ORM\Column(type: 'uuid', unique: true)]
@@ -62,12 +62,13 @@ final class WorkoutSession
     private Collection $workoutExercises;
 
     private function __construct(
+        Uuid $id,
         User $user,
         \DateTimeImmutable $date,
         ?string $name = null,
         ?string $notes = null,
     ) {
-        $this->id = (string) Uuid::v4();
+        $this->id = (string) $id;
         $this->user = $user;
         $this->date = $date;
         $this->name = $name;
@@ -80,12 +81,13 @@ final class WorkoutSession
     }
 
     public static function create(
+        Uuid $id,
         User $user,
         \DateTimeImmutable $date,
         ?string $name = null,
         ?string $notes = null,
     ): self {
-        return new self($user, $date, $name, $notes);
+        return new self($id, $user, $date, $name, $notes);
     }
 
     public function getId(): string
@@ -152,7 +154,7 @@ final class WorkoutSession
     public function update(
         \DateTimeImmutable $date,
         ?string $name = null,
-        ?string $notes = null
+        ?string $notes = null,
     ): void {
         $this->date = $date;
         $this->name = $name;

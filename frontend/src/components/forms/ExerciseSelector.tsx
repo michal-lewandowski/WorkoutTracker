@@ -184,3 +184,4 @@ export function ExerciseSelector({ onSelectExercise }: ExerciseSelectorProps) {
   );
 }
 
+

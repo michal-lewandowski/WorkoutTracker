@@ -72,4 +72,3 @@ final readonly class StatisticsCalculator
         return round($progress, 2);
     }
 }
-

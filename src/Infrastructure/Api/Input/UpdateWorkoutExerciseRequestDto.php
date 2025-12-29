@@ -27,7 +27,7 @@ final readonly class UpdateWorkoutExerciseRequestDto
         #[Assert\NotBlank]
         #[Assert\Valid]
         #[Assert\Count(min: 1, max: 20)]
-        public array $sets
-    ) {}
+        public array $sets,
+    ) {
+    }
 }
-

@@ -34,22 +34,21 @@ interface WorkoutSessionRepositoryInterface
         ?\DateTimeImmutable $dateFrom = null,
         ?\DateTimeImmutable $dateTo = null,
         string $sortBy = 'date',
-        string $sortOrder = 'desc'
+        string $sortOrder = 'desc',
     ): array;
 
     public function countByUserId(
         string $userId,
         ?\DateTimeImmutable $dateFrom = null,
-        ?\DateTimeImmutable $dateTo = null
+        ?\DateTimeImmutable $dateTo = null,
     ): int;
 
     /**
      * Pobiera sesję treningową wraz z wszystkimi powiązanymi ćwiczeniami i seriami.
      * Używa JOIN FETCH aby uniknąć problemu N+1.
-     * 
-     * @param string $id ID sesji treningowej
+     *
+     * @param string $id     ID sesji treningowej
      * @param string $userId ID użytkownika (weryfikacja dostępu)
      */
     public function findByIdWithExercises(string $id, string $userId): ?WorkoutSession;
 }
-

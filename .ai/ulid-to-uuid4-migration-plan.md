@@ -158,7 +158,7 @@ Powinno wyświetlić: `[OK] The database schema is in sync with the mapping file
 
 **6.2. Test utworzenia użytkownika przez CLI**
 ```bash
-docker exec workouttracker-php-1 php bin/console app:create-user test@example.com password123
+docker exec workouttracker-php-1 php bin/console app:create-user test@test.com password123
 ```
 
 **6.3. Sprawdzenie ID w bazie**
@@ -306,7 +306,7 @@ docker exec workouttracker-php-1 php bin/console doctrine:migrations:migrate --n
 docker exec workouttracker-php-1 php bin/console doctrine:schema:validate
 
 # Krok 13: Test CLI
-docker exec workouttracker-php-1 php bin/console app:create-user test@example.com password123
+docker exec workouttracker-php-1 php bin/console app:create-user test@test.com password123
 
 # Krok 14: Testy
 docker exec workouttracker-php-1 php bin/phpunit

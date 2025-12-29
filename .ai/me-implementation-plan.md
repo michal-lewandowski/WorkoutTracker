@@ -841,7 +841,7 @@ final class GetCurrentUserControllerTest extends WebTestCase
     public function testGetCurrentUserSuccess(): void
     {
         // Arrange: Create user and get valid JWT token
-        $email = 'test@example.com';
+        $email = 'test@test.com';
         $password = 'SecurePass123!';
         
         $this->createUser($email, $password);
@@ -983,7 +983,7 @@ php bin/phpunit tests/Functional/Controller/Auth/GetCurrentUserControllerTest.ph
 # Krok 1: Rejestracja użytkownika
 curl -X POST https://localhost/api/v1/auth/register \
   -H "Content-Type: application/json" \
-  -d '{"email":"test@example.com","password":"SecurePass123!","passwordConfirmation":"SecurePass123!"}'
+  -d '{"email":"test@test.com","password":"SecurePass123!","passwordConfirmation":"SecurePass123!"}'
 
 # Response: {"token":"eyJ0eXAiOiJKV1QiLCJhbGc...","user":{...}}
 
@@ -993,7 +993,7 @@ curl -X GET https://localhost/api/v1/auth/me \
   -H "Accept: application/json"
 
 # Expected response (200):
-# {"id":"01JABA5X7G9VQW3N8C2T4H6MYR","email":"test@example.com","createdAt":"2025-10-11T10:30:00+00:00"}
+# {"id":"01JABA5X7G9VQW3N8C2T4H6MYR","email":"test@test.com","createdAt":"2025-10-11T10:30:00+00:00"}
 ```
 
 #### 7.2 Test bez tokena

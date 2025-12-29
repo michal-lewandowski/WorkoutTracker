@@ -27,8 +27,7 @@ final readonly class WorkoutExerciseDto
         public string $exerciseId,
         public ExerciseSummaryDto $exercise,
         public array $exerciseSets,
-        public \DateTimeImmutable $createdAt
+        public \DateTimeImmutable $createdAt,
     ) {
     }
 }
-

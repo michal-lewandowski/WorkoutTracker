@@ -20,7 +20,7 @@ final readonly class DeleteWorkoutExerciseCommand
 {
     public function __construct(
         public string $userId,
-        public string $workoutExerciseId
-    ) {}
+        public string $workoutExerciseId,
+    ) {
+    }
 }
-

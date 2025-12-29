@@ -13,6 +13,7 @@ use App\Domain\Entity\WorkoutSession;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Uid\Uuid;
 
 final class GetExerciseStatisticsControllerTest extends WebTestCase
 {
@@ -144,6 +145,7 @@ final class GetExerciseStatisticsControllerTest extends WebTestCase
 
         // Utwórz 3 sesje treningowe z różnymi wagami
         $session1 = WorkoutSession::create(
+            Uuid::v4(),
             user: $user,
             date: new \DateTimeImmutable('2025-01-01'),
             name: 'Session 1'
@@ -151,6 +153,7 @@ final class GetExerciseStatisticsControllerTest extends WebTestCase
         $em->persist($session1);
 
         $session2 = WorkoutSession::create(
+            Uuid::v4(),
             user: $user,
             date: new \DateTimeImmutable('2025-01-08'),
             name: 'Session 2'
@@ -158,6 +161,7 @@ final class GetExerciseStatisticsControllerTest extends WebTestCase
         $em->persist($session2);
 
         $session3 = WorkoutSession::create(
+            Uuid::v4(),
             user: $user,
             date: new \DateTimeImmutable('2025-01-15'),
             name: 'Session 3'
@@ -168,7 +172,7 @@ final class GetExerciseStatisticsControllerTest extends WebTestCase
 
         // Dodaj workout exercises z setami
         // Session 1: max 70kg
-        $workoutEx1 = WorkoutExercise::create($session1, $exercise);
+        $workoutEx1 = WorkoutExercise::create(Uuid::v4(), $session1, $exercise);
         $em->persist($workoutEx1);
         $em->flush();
         
@@ -176,7 +180,7 @@ final class GetExerciseStatisticsControllerTest extends WebTestCase
         $em->persist($set1_1);
 
         // Session 2: max 75kg
-        $workoutEx2 = WorkoutExercise::create($session2, $exercise);
+        $workoutEx2 = WorkoutExercise::create(Uuid::v4(), $session2, $exercise);
         $em->persist($workoutEx2);
         $em->flush();
         
@@ -186,7 +190,7 @@ final class GetExerciseStatisticsControllerTest extends WebTestCase
         $em->persist($set2_2);
 
         // Session 3: max 77.5kg
-        $workoutEx3 = WorkoutExercise::create($session3, $exercise);
+        $workoutEx3 = WorkoutExercise::create(Uuid::v4(), $session3, $exercise);
         $em->persist($workoutEx3);
         $em->flush();
         
@@ -272,17 +276,17 @@ final class GetExerciseStatisticsControllerTest extends WebTestCase
         $em->flush();
 
         // Utwórz 3 sesje: 2024-12-01, 2025-01-15, 2025-02-01
-        $session1 = WorkoutSession::create($user, new \DateTimeImmutable('2024-12-01'));
-        $session2 = WorkoutSession::create($user, new \DateTimeImmutable('2025-01-15'));
-        $session3 = WorkoutSession::create($user, new \DateTimeImmutable('2025-02-01'));
+        $session1 = WorkoutSession::create(Uuid::v4(),$user, new \DateTimeImmutable('2024-12-01'));
+        $session2 = WorkoutSession::create(Uuid::v4(),$user, new \DateTimeImmutable('2025-01-15'));
+        $session3 = WorkoutSession::create(Uuid::v4(),$user, new \DateTimeImmutable('2025-02-01'));
         $em->persist($session1);
         $em->persist($session2);
         $em->persist($session3);
         $em->flush();
 
-        $workoutEx1 = WorkoutExercise::create($session1, $exercise);
-        $workoutEx2 = WorkoutExercise::create($session2, $exercise);
-        $workoutEx3 = WorkoutExercise::create($session3, $exercise);
+        $workoutEx1 = WorkoutExercise::create(Uuid::v4(), $session1, $exercise);
+        $workoutEx2 = WorkoutExercise::create(Uuid::v4(), $session2, $exercise);
+        $workoutEx3 = WorkoutExercise::create(Uuid::v4(), $session3, $exercise);
         $em->persist($workoutEx1);
         $em->persist($workoutEx2);
         $em->persist($workoutEx3);
@@ -335,13 +339,14 @@ final class GetExerciseStatisticsControllerTest extends WebTestCase
         // Utwórz 5 sesji
         for ($i = 1; $i <= 5; ++$i) {
             $session = WorkoutSession::create(
+                Uuid::v4(),
                 $user, 
                 new \DateTimeImmutable("2025-01-" . sprintf("%02d", $i * 2))
             );
             $em->persist($session);
             $em->flush();
 
-            $workoutEx = WorkoutExercise::create($session, $exercise);
+            $workoutEx = WorkoutExercise::create(Uuid::v4(), $session, $exercise);
             $em->persist($workoutEx);
             $em->flush();
 
@@ -387,11 +392,11 @@ final class GetExerciseStatisticsControllerTest extends WebTestCase
         $em->persist($exercise);
         $em->flush();
 
-        $session = WorkoutSession::create($user, new \DateTimeImmutable());
+        $session = WorkoutSession::create(Uuid::v4(), $user, new \DateTimeImmutable());
         $em->persist($session);
         $em->flush();
 
-        $workoutEx = WorkoutExercise::create($session, $exercise);
+        $workoutEx = WorkoutExercise::create(Uuid::v4(), $session, $exercise);
         $em->persist($workoutEx);
         $em->flush();
 

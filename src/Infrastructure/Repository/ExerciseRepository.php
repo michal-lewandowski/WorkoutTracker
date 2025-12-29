@@ -33,7 +33,7 @@ final class ExerciseRepository extends ServiceEntityRepository implements Exerci
 
     public function findAll(): array
     {
-        /** @var list<Exercise> */
+        /* @var list<Exercise> */
         return $this->createQueryBuilder('e')
             ->leftJoin('e.muscleCategory', 'mc')
             ->addSelect('mc')
@@ -44,7 +44,7 @@ final class ExerciseRepository extends ServiceEntityRepository implements Exerci
 
     public function findById(string $id): ?Exercise
     {
-        /** @var Exercise|null */
+        /* @var Exercise|null */
         return $this->createQueryBuilder('e')
             ->leftJoin('e.muscleCategory', 'mc')
             ->addSelect('mc')
@@ -75,7 +75,7 @@ final class ExerciseRepository extends ServiceEntityRepository implements Exerci
             )->setParameter('search', $searchTerm);
         }
 
-        /** @var list<Exercise> */
+        /* @var list<Exercise> */
         return $qb->orderBy('e.name', 'ASC')
                   ->getQuery()
                   ->getResult();

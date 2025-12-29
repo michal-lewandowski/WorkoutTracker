@@ -27,14 +27,12 @@ final readonly class CreateWorkoutExerciseRequestDto
         #[Assert\NotBlank]
         #[Assert\Uuid]
         public string $workoutSessionId,
-
         #[Assert\NotBlank]
         #[Assert\Uuid]
         public string $exerciseId,
-
         #[Assert\Valid]
         #[Assert\Count(max: 20)]
-        public ?array $sets = null
-    ) {}
+        public ?array $sets = null,
+    ) {
+    }
 }
-

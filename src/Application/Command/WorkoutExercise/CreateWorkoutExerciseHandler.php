@@ -16,11 +16,10 @@ declare(strict_types=1);
 
 namespace App\Application\Command\WorkoutExercise;
 
-use App\Application\Exception\ExerciseNotFoundException;
-use App\Application\Exception\WorkoutSessionAccessDeniedException;
-use App\Application\Exception\WorkoutSessionNotFoundException;
 use App\Domain\Entity\ExerciseSet;
 use App\Domain\Entity\WorkoutExercise;
+use App\Domain\Exception\ExerciseNotFoundException;
+use App\Domain\Exception\WorkoutSessionNotFoundException;
 use App\Domain\Repository\ExerciseRepositoryInterface;
 use App\Domain\Repository\WorkoutExerciseRepositoryInterface;
 use App\Domain\Repository\WorkoutSessionRepositoryInterface;
@@ -31,9 +30,10 @@ final readonly class CreateWorkoutExerciseHandler
         private WorkoutSessionRepositoryInterface $workoutSessionRepository,
         private ExerciseRepositoryInterface $exerciseRepository,
         private WorkoutExerciseRepositoryInterface $workoutExerciseRepository,
-    ) {}
+    ) {
+    }
 
-    public function handle(CreateWorkoutExerciseCommand $command): WorkoutExercise
+    public function handle(CreateWorkoutExerciseCommand $command): void
     {
         // 1. Pobierz i zwaliduj WorkoutSession
         $workoutSession = $this->workoutSessionRepository->findById(
@@ -58,8 +58,7 @@ final readonly class CreateWorkoutExerciseHandler
         }
 
         // 4. Utwórz WorkoutExercise
-        $workoutExercise = WorkoutExercise::create($workoutSession, $exercise);
-        $this->workoutExerciseRepository->save($workoutExercise);
+        $workoutExercise = WorkoutExercise::create($command->id, $workoutSession, $exercise);
 
         // 5. Utwórz ExerciseSets (jeśli są podane)
         if (null !== $command->sets && count($command->sets) > 0) {
@@ -80,9 +79,6 @@ final readonly class CreateWorkoutExerciseHandler
         }
 
         // 6. Flush wszystkich zmian
-        $this->workoutExerciseRepository->flush();
-
-        return $workoutExercise;
+        $this->workoutExerciseRepository->save($workoutExercise);
     }
 }
-

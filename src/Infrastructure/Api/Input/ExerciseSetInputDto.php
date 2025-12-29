@@ -25,17 +25,15 @@ final readonly class ExerciseSetInputDto
         #[Assert\Type('integer')]
         #[Assert\Positive]
         public int $setsCount,
-
         #[Assert\NotBlank]
         #[Assert\Type('integer')]
         #[Assert\Range(min: 1, max: 100)]
         public int $reps,
-
         #[Assert\NotBlank]
         #[Assert\Type('float')]
         #[Assert\PositiveOrZero]
         #[Assert\LessThanOrEqual(1000)]
-        public float $weightKg
-    ) {}
+        public float $weightKg,
+    ) {
+    }
 }
-

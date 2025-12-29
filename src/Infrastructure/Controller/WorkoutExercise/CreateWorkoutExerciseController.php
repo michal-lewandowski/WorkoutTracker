@@ -19,6 +19,7 @@ namespace App\Infrastructure\Controller\WorkoutExercise;
 use App\Application\Command\WorkoutExercise\CreateWorkoutExerciseCommand;
 use App\Application\Command\WorkoutExercise\CreateWorkoutExerciseHandler;
 use App\Domain\Entity\User;
+use App\Domain\Repository\WorkoutExerciseRepositoryInterface;
 use App\Infrastructure\Api\Input\CreateWorkoutExerciseRequestDto;
 use App\Infrastructure\Api\Output\ExerciseSetDto;
 use App\Infrastructure\Api\Output\ExerciseSummaryDto;
@@ -29,17 +30,20 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Component\Uid\Uuid;
 
 #[Route('/api/v1/workout-exercises', name: 'create_workout_exercise', methods: ['POST'])]
 #[IsGranted('IS_AUTHENTICATED_FULLY')]
 final class CreateWorkoutExerciseController extends AbstractController
 {
     public function __construct(
-        private readonly CreateWorkoutExerciseHandler $handler
-    ) {}
+        private readonly CreateWorkoutExerciseHandler $handler,
+        private readonly WorkoutExerciseRepositoryInterface $workoutExerciseRepository,
+    ) {
+    }
 
     public function __invoke(
-        #[MapRequestPayload] CreateWorkoutExerciseRequestDto $requestDto
+        #[MapRequestPayload] CreateWorkoutExerciseRequestDto $requestDto,
     ): JsonResponse {
         /** @var User $user */
         $user = $this->getUser();
@@ -59,6 +63,7 @@ final class CreateWorkoutExerciseController extends AbstractController
 
         // Utworzenie commanda
         $command = new CreateWorkoutExerciseCommand(
+            id: Uuid::v4(),
             userId: $user->getId(),
             workoutSessionId: $requestDto->workoutSessionId,
             exerciseId: $requestDto->exerciseId,
@@ -66,7 +71,9 @@ final class CreateWorkoutExerciseController extends AbstractController
         );
 
         // Wykonanie commanda
-        $workoutExercise = $this->handler->handle($command);
+        $this->handler->handle($command);
+
+        $workoutExercise = $this->workoutExerciseRepository->findById((string) $command->id);
 
         // Mapowanie encji na DTO
         $exercise = $workoutExercise->getExercise();
@@ -101,4 +108,3 @@ final class CreateWorkoutExerciseController extends AbstractController
         return $this->json($responseDto, Response::HTTP_CREATED);
     }
 }
-

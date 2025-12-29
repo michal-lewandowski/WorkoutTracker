@@ -16,8 +16,8 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\EventListener;
 
-use App\Application\Exception\WorkoutSessionAccessDeniedException;
-use App\Application\Exception\WorkoutSessionNotFoundException;
+use App\Domain\Exception\WorkoutSessionAccessDeniedException;
+use App\Domain\Exception\WorkoutSessionNotFoundException;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
@@ -58,4 +58,3 @@ final readonly class WorkoutSessionExceptionListener
         }
     }
 }
-

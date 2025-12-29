@@ -17,7 +17,8 @@ declare(strict_types=1);
 namespace App\Infrastructure\Controller\Auth;
 
 use App\Application\Command\Auth\RegisterUserCommand;
-use App\Application\Exception\EmailAlreadyExistsException;
+use App\Application\Command\Auth\RegisterUserHandler;
+use App\Domain\Exception\EmailAlreadyExistsException;
 use App\Domain\Repository\UserRepositoryInterface;
 use App\Domain\Service\UserRegistrationServiceInterface;
 use App\Infrastructure\Api\Input\RegisterRequestDto;
@@ -35,6 +36,7 @@ final class RegisterController extends AbstractController
 {
     public function __construct(
         private readonly UserRegistrationServiceInterface $registrationService,
+        private readonly RegisterUserHandler $handler,
         private JWTTokenManagerInterface $jwtManager,
         private UserRepositoryInterface $userRepository,
     ) {
@@ -46,7 +48,7 @@ final class RegisterController extends AbstractController
     ): JsonResponse {
         try {
             $command = RegisterUserCommand::fromDto($dto);
-            $this->registrationService->register($command);
+            $this->handler->handle($command);
 
             $user = $this->userRepository->findByEmail($command->email);
 

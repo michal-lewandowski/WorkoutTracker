@@ -38,7 +38,6 @@ interface WorkoutExerciseRepositoryInterface
         string $userId,
         ?\DateTimeImmutable $dateFrom = null,
         ?\DateTimeImmutable $dateTo = null,
-        ?int $limit = 100
+        ?int $limit = 100,
     ): array;
 }
-

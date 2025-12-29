@@ -16,27 +16,34 @@ declare(strict_types=1);
 
 namespace App\Application\Command\WorkoutSession;
 
-use App\Domain\Entity\WorkoutSession;
+use App\Domain\Exception\WorkoutSessionNotFoundException;
 use App\Domain\Repository\WorkoutSessionRepositoryInterface;
 
 final readonly class UpdateWorkoutSessionHandler
 {
     public function __construct(
-        private WorkoutSessionRepositoryInterface $workoutSessionRepository
+        private WorkoutSessionRepositoryInterface $workoutSessionRepository,
     ) {
     }
 
-    public function handle(UpdateWorkoutSessionCommand $command): WorkoutSession
+    public function handle(UpdateWorkoutSessionCommand $command): void
     {
-        $command->workoutSession->update(
+        // Pobranie sesji z weryfikacją dostępu
+        $workoutSession = $this->workoutSessionRepository->findByIdWithExercises(
+            id: $command->id,
+            userId: $command->userId
+        );
+
+        if (null === $workoutSession) {
+            throw WorkoutSessionNotFoundException::withId($command->id);
+        }
+
+        $workoutSession->update(
             date: $command->date,
             name: $command->name,
             notes: $command->notes
         );
 
-        $this->workoutSessionRepository->save($command->workoutSession);
-
-        return $command->workoutSession;
+        $this->workoutSessionRepository->save($workoutSession);
     }
 }
-

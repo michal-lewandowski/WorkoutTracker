@@ -16,18 +16,19 @@ declare(strict_types=1);
 
 namespace App\Application\Command\WorkoutExercise;
 
-use App\Application\Exception\WorkoutExerciseNotFoundException;
 use App\Domain\Entity\ExerciseSet;
 use App\Domain\Entity\WorkoutExercise;
+use App\Domain\Exception\WorkoutExerciseNotFoundException;
 use App\Domain\Repository\WorkoutExerciseRepositoryInterface;
 
 final readonly class UpdateWorkoutExerciseHandler
 {
     public function __construct(
         private WorkoutExerciseRepositoryInterface $workoutExerciseRepository,
-    ) {}
+    ) {
+    }
 
-    public function handle(UpdateWorkoutExerciseCommand $command): WorkoutExercise
+    public function handle(UpdateWorkoutExerciseCommand $command): void
     {
         // 1. Pobierz i zwaliduj WorkoutExercise z filtrowaniem po userId
         $workoutExercise = $this->workoutExerciseRepository->findById(
@@ -60,9 +61,6 @@ final readonly class UpdateWorkoutExerciseHandler
         }
 
         // 4. Flush zmian (usunie stare sety przez orphanRemoval i zapisze nowe)
-        $this->workoutExerciseRepository->flush();
-
-        return $workoutExercise;
+        $this->workoutExerciseRepository->save($workoutExercise);
     }
 }
-

@@ -155,7 +155,7 @@ final class SeedExercisesCommand extends Command
 
     /**
      * @param array{name_pl: string, name_en: string, exercises: array<int, array{name_pl: string, name_en: string}>} $categoryData
-     * @param array{categories_added: int, categories_skipped: int, exercises_added: int, exercises_skipped: int} $stats
+     * @param array{categories_added: int, categories_skipped: int, exercises_added: int, exercises_skipped: int}     $stats
      */
     private function processCategory(array $categoryData, array &$stats, bool $isDryRun): void
     {
@@ -185,14 +185,14 @@ final class SeedExercisesCommand extends Command
     }
 
     /**
-     * @param array{name_pl: string, name_en: string} $exerciseData
+     * @param array{name_pl: string, name_en: string}                                                             $exerciseData
      * @param array{categories_added: int, categories_skipped: int, exercises_added: int, exercises_skipped: int} $stats
      */
     private function processExercise(
         array $exerciseData,
         MuscleCategory $category,
         array &$stats,
-        bool $isDryRun
+        bool $isDryRun,
     ): void {
         // Check if exercise already exists
         $existingExercise = $this->findExerciseByName($exerciseData['name_pl']);
@@ -218,7 +218,7 @@ final class SeedExercisesCommand extends Command
 
     private function findCategoryByName(string $name): ?MuscleCategory
     {
-        /** @var MuscleCategory|null */
+        /* @var MuscleCategory|null */
         return $this->entityManager->getRepository(MuscleCategory::class)
             ->createQueryBuilder('mc')
             ->where('mc.namePl = :name')
@@ -229,7 +229,7 @@ final class SeedExercisesCommand extends Command
 
     private function findExerciseByName(string $name): ?Exercise
     {
-        /** @var Exercise|null */
+        /* @var Exercise|null */
         return $this->entityManager->getRepository(Exercise::class)
             ->createQueryBuilder('e')
             ->where('e.name = :name')
@@ -264,4 +264,3 @@ final class SeedExercisesCommand extends Command
         }
     }
 }
-

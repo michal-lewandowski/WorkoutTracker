@@ -24,7 +24,7 @@ final readonly class UpdateWorkoutExerciseCommand
     public function __construct(
         public string $userId,
         public string $workoutExerciseId,
-        public array $sets
-    ) {}
+        public array $sets,
+    ) {
+    }
 }
-

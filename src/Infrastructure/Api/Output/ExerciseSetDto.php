@@ -24,8 +24,7 @@ final readonly class ExerciseSetDto
         public int $setsCount,
         public int $reps,
         public float $weightKg,
-        public \DateTimeImmutable $createdAt
+        public \DateTimeImmutable $createdAt,
     ) {
     }
 }
-

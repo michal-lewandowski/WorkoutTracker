@@ -25,8 +25,7 @@ final readonly class WorkoutSessionListDto
         public array $items,
         public int $total,
         public int $limit,
-        public int $offset
+        public int $offset,
     ) {
     }
 }
-

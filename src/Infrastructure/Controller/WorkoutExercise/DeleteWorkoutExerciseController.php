@@ -30,8 +30,9 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 final class DeleteWorkoutExerciseController extends AbstractController
 {
     public function __construct(
-        private readonly DeleteWorkoutExerciseHandler $handler
-    ) {}
+        private readonly DeleteWorkoutExerciseHandler $handler,
+    ) {
+    }
 
     public function __invoke(string $id): JsonResponse
     {
@@ -51,4 +52,3 @@ final class DeleteWorkoutExerciseController extends AbstractController
         return new JsonResponse(null, Response::HTTP_NO_CONTENT);
     }
 }
-

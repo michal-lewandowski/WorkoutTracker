@@ -16,8 +16,8 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\EventListener;
 
-use App\Application\Exception\ExerciseNotFoundException;
-use App\Application\Exception\WorkoutExerciseNotFoundException;
+use App\Domain\Exception\ExerciseNotFoundException;
+use App\Domain\Exception\WorkoutExerciseNotFoundException;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
@@ -58,4 +58,3 @@ final readonly class WorkoutExerciseExceptionListener
         }
     }
 }
-

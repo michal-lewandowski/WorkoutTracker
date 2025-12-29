@@ -209,8 +209,8 @@ final class EmailTest extends TestCase
 {
     public function testValidEmail(): void
     {
-        $email = new Email('test@example.com');
-        self::assertSame('test@example.com', $email->value);
+        $email = new Email('test@test.com');
+        self::assertSame('test@test.com', $email->value);
     }
     
     public function testInvalidEmailThrowsException(): void

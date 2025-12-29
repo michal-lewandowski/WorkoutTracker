@@ -62,7 +62,7 @@ final class WorkoutSessionRepository extends ServiceEntityRepository implements 
         ?\DateTimeImmutable $dateFrom = null,
         ?\DateTimeImmutable $dateTo = null,
         string $sortBy = 'date',
-        string $sortOrder = 'desc'
+        string $sortOrder = 'desc',
     ): array {
         $qb = $this->createQueryBuilder('ws')
             ->where('ws.user = :userId')
@@ -99,7 +99,7 @@ final class WorkoutSessionRepository extends ServiceEntityRepository implements 
     public function countByUserId(
         string $userId,
         ?\DateTimeImmutable $dateFrom = null,
-        ?\DateTimeImmutable $dateTo = null
+        ?\DateTimeImmutable $dateTo = null,
     ): int {
         $qb = $this->createQueryBuilder('ws')
             ->select('COUNT(ws.id)')
@@ -140,4 +140,3 @@ final class WorkoutSessionRepository extends ServiceEntityRepository implements 
         return $result;
     }
 }
-

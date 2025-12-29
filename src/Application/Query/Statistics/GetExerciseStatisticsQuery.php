@@ -14,13 +14,16 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-namespace App\Application\Exception;
+namespace App\Application\Query\Statistics;
 
-final class WorkoutExerciseNotFoundException extends \RuntimeException
+final readonly class GetExerciseStatisticsQuery
 {
-    public static function withId(string $id): self
-    {
-        return new self(sprintf('Workout exercise with ID "%s" not found', $id));
+    public function __construct(
+        public string $exerciseId,
+        public string $userId,
+        public ?\DateTimeImmutable $dateFrom = null,
+        public ?\DateTimeImmutable $dateTo = null,
+        public ?int $limit = 100,
+    ) {
     }
 }
-

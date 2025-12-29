@@ -14,15 +14,12 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-namespace App\Application\Exception;
+namespace App\Domain\Exception;
 
-final class WorkoutSessionNotFoundException extends \RuntimeException
+final class WorkoutSessionAccessDeniedException extends \RuntimeException
 {
-    public function __construct(string $id)
+    public function __construct()
     {
-        parent::__construct(
-            sprintf('Workout session with id "%s" not found', $id)
-        );
+        parent::__construct('Access denied to this workout session');
     }
 }
-

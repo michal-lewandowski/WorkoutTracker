@@ -18,7 +18,6 @@ namespace App\Infrastructure\Controller\WorkoutSession;
 
 use App\Application\Command\WorkoutSession\UpdateWorkoutSessionCommand;
 use App\Application\Command\WorkoutSession\UpdateWorkoutSessionHandler;
-use App\Application\Exception\WorkoutSessionNotFoundException;
 use App\Domain\Entity\User;
 use App\Domain\Repository\WorkoutSessionRepositoryInterface;
 use App\Infrastructure\Api\Input\UpdateWorkoutSessionRequestDto;
@@ -39,39 +38,31 @@ final class UpdateWorkoutSessionController extends AbstractController
 {
     public function __construct(
         private readonly WorkoutSessionRepositoryInterface $workoutSessionRepository,
-        private readonly UpdateWorkoutSessionHandler $handler
+        private readonly UpdateWorkoutSessionHandler $handler,
     ) {
     }
 
     public function __invoke(
         string $id,
-        #[MapRequestPayload] UpdateWorkoutSessionRequestDto $requestDto
+        #[MapRequestPayload] UpdateWorkoutSessionRequestDto $requestDto,
     ): JsonResponse {
         /** @var User $user */
         $user = $this->getUser();
-
-        // Pobranie sesji z weryfikacją dostępu
-        $workoutSession = $this->workoutSessionRepository->findByIdWithExercises(
-            id: $id,
-            userId: $user->getId()
-        );
-
-        if (null === $workoutSession) {
-            throw new WorkoutSessionNotFoundException($id);
-        }
 
         // Konwersja daty z string na DateTimeImmutable
         $date = new \DateTimeImmutable($requestDto->date);
 
         // Utworzenie i wykonanie commanda
         $command = new UpdateWorkoutSessionCommand(
-            workoutSession: $workoutSession,
+            id: $id,
+            userId: $user->getId(),
             date: $date,
             name: $requestDto->name,
             notes: $requestDto->notes
         );
 
-        $updatedWorkoutSession = $this->handler->handle($command);
+        $this->handler->handle($command);
+        $updatedWorkoutSession = $this->workoutSessionRepository->findById($command->id);
 
         // Mapowanie WorkoutExercises na DTOs
         $workoutExerciseDtos = [];
@@ -118,4 +109,3 @@ final class UpdateWorkoutSessionController extends AbstractController
         return $this->json($responseDto, Response::HTTP_OK);
     }
 }
-

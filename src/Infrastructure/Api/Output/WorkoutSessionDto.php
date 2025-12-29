@@ -24,8 +24,7 @@ final readonly class WorkoutSessionDto
         public ?string $name,
         public ?string $notes,
         public \DateTimeImmutable $createdAt,
-        public int $exerciseCount
+        public int $exerciseCount,
     ) {
     }
 }
-

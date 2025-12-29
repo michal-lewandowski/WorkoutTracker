@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Tests\Unit\Infrastructure\Service\Auth;
 
 use App\Application\Command\Auth\RegisterUserCommand;
-use App\Application\Exception\EmailAlreadyExistsException;
 use App\Domain\Entity\User;
+use App\Domain\Exception\EmailAlreadyExistsException;
 use App\Domain\Repository\UserRepositoryInterface;
 use App\Infrastructure\Service\Auth\UserRegistrationService;
 use PHPUnit\Framework\TestCase;
@@ -35,15 +35,10 @@ final class UserRegistrationServiceTest extends TestCase
     
     public function testSuccessfulRegistration(): void
     {
-        $command = new RegisterUserCommand(
-            email: 'test@example.com',
-            plainPassword: 'SecurePass123'
-        );
-        
         $this->userRepository
             ->expects($this->once())
             ->method('findByEmail')
-            ->with('test@example.com')
+            ->with('test@test.com')
             ->willReturn(null);
         
         $this->passwordHasher
@@ -55,7 +50,7 @@ final class UserRegistrationServiceTest extends TestCase
             ->expects($this->once())
             ->method('save')
             ->with($this->callback(function (User $user) {
-                return $user->getEmail() === 'test@example.com'
+                return $user->getEmail() === 'test@test.com'
                     && $user->getPasswordHash() === '$hashed$password$';
             }));
         
@@ -69,16 +64,11 @@ final class UserRegistrationServiceTest extends TestCase
                 )
             );
         
-        $this->service->register($command);
+        $this->service->register('test@test.com', 'SecurePass123');
     }
     
     public function testRegistrationFailsWhenEmailExists(): void
     {
-        $command = new RegisterUserCommand(
-            email: 'existing@example.com',
-            plainPassword: 'SecurePass123'
-        );
-        
         $existingUser = User::create('existing@example.com');
         
         $this->userRepository
@@ -105,17 +95,12 @@ final class UserRegistrationServiceTest extends TestCase
         
         $this->expectException(EmailAlreadyExistsException::class);
         $this->expectExceptionMessage('Email "existing@example.com" is already registered');
-        
-        $this->service->register($command);
+
+        $this->service->register('existing@example.com', 'SecurePass123');
     }
     
     public function testRegistrationFailsOnDatabaseError(): void
     {
-        $command = new RegisterUserCommand(
-            email: 'test@example.com',
-            plainPassword: 'SecurePass123'
-        );
-        
         $this->userRepository
             ->expects($this->once())
             ->method('findByEmail')
@@ -141,17 +126,13 @@ final class UserRegistrationServiceTest extends TestCase
         
         $this->expectException(\RuntimeException::class);
         $this->expectExceptionMessage('Failed to create user account');
-        
-        $this->service->register($command);
+
+        $this->service->register('test@test.com', 'SecurePass123');
     }
     
     public function testPasswordIsHashed(): void
     {
-        $command = new RegisterUserCommand(
-            email: 'test@example.com',
-            plainPassword: 'PlainPassword123'
-        );
-        
+
         $this->userRepository
             ->expects($this->once())
             ->method('findByEmail')
@@ -161,7 +142,7 @@ final class UserRegistrationServiceTest extends TestCase
             ->expects($this->once())
             ->method('hashPassword')
             ->with(
-                $this->callback(fn(User $user) => $user->getEmail() === 'test@example.com'),
+                $this->callback(fn(User $user) => $user->getEmail() === 'test@test.com'),
                 'PlainPassword123'
             )
             ->willReturn('$2y$13$hashed.password.here');
@@ -172,21 +153,16 @@ final class UserRegistrationServiceTest extends TestCase
             ->with($this->callback(function (User $user) {
                 return $user->getPasswordHash() === '$2y$13$hashed.password.here';
             }));
-        
-        $this->service->register($command);
+
+        $this->service->register('test@test.com', 'PlainPassword123');
     }
     
     public function testEmailIsNormalizedToLowercase(): void
     {
-        $command = new RegisterUserCommand(
-            email: 'Test@EXAMPLE.COM',
-            plainPassword: 'SecurePass123'
-        );
-        
         $this->userRepository
             ->expects($this->once())
             ->method('findByEmail')
-            ->with('Test@EXAMPLE.COM')
+            ->with('test@test.com')
             ->willReturn(null);
         
         $this->passwordHasher
@@ -198,10 +174,10 @@ final class UserRegistrationServiceTest extends TestCase
             ->method('save')
             ->with($this->callback(function (User $user) {
                 // User entity normalizes email to lowercase in constructor
-                return $user->getEmail() === 'test@example.com';
+                return $user->getEmail() === 'test@test.com';
             }));
         
-        $this->service->register($command);
+        $this->service->register('test@test.com', 'SecurePass123');
     }
 }
 

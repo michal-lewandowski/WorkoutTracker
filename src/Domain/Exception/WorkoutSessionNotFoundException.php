@@ -14,13 +14,19 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-namespace App\Application\Exception;
+namespace App\Domain\Exception;
 
-final class ExerciseNotFoundException extends \RuntimeException
+final class WorkoutSessionNotFoundException extends \RuntimeException
 {
+    public function __construct(string $id)
+    {
+        parent::__construct(
+            sprintf('Workout session with id "%s" not found', $id)
+        );
+    }
+
     public static function withId(string $id): self
     {
         return new self(sprintf('Exercise with ID "%s" not found', $id));
     }
 }
-
