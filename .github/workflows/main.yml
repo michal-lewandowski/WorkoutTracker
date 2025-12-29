@@ -131,7 +131,7 @@ jobs:
       run: |
         # Run PHPUnit tests in container
         docker run --network host \
-          -e DATABASE_URL="postgresql://postgres:postgres@localhost:5432/workout_tracker_test?serverVersion=15&charset=utf8" \
+          -e DATABASE_URL="postgresql://postgres:postgres@localhost:5432/workout_tracker?serverVersion=15&charset=utf8" \
           -e APP_ENV=test \
           -v ${{ github.workspace }}:/app \
           ${{ env.PHP_IMAGE }} \
