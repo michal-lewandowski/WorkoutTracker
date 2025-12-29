@@ -126,6 +126,14 @@ jobs:
         PHP_IMAGE="${{ needs.build-images.outputs.php_image }}"
         echo "Using PHP image: $PHP_IMAGE"
         echo "PHP_IMAGE=$PHP_IMAGE" >> $GITHUB_ENV
+        
+    - name: Generate JWT keys for tests
+      run: |
+        mkdir -p config/jwt
+        echo "Creating JWT test keys"
+        openssl genrsa -out config/jwt/private.pem 4096
+        openssl rsa -in config/jwt/private.pem -pubout -out config/jwt/public.pem
+        echo "JWT test keys created"
     
     - name: Run tests in Docker container
       run: |
@@ -133,6 +141,9 @@ jobs:
         docker run --network host \
           -e DATABASE_URL="postgresql://postgres:postgres@localhost:5432/workout_tracker?serverVersion=15&charset=utf8" \
           -e APP_ENV=test \
+          -e JWT_SECRET_KEY=%kernel.project_dir%/config/jwt/private.pem \
+          -e JWT_PUBLIC_KEY=%kernel.project_dir%/config/jwt/public.pem \
+          -e JWT_PASSPHRASE=test \
           -v ${{ github.workspace }}:/app \
           ${{ env.PHP_IMAGE }} \
           php bin/phpunit
@@ -199,6 +210,17 @@ jobs:
         registry: ghcr.io
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
+        
+    - name: Generate JWT keys for tests
+      run: |
+        mkdir -p config/jwt
+        echo "Creating JWT keys"
+        openssl genrsa -out config/jwt/private.pem 4096
+        openssl rsa -in config/jwt/private.pem -pubout -out config/jwt/public.pem
+        echo "JWT keys created"
+        echo "JWT_SECRET_KEY=%kernel.project_dir%/config/jwt/private.pem" >> .env.local
+        echo "JWT_PUBLIC_KEY=%kernel.project_dir%/config/jwt/public.pem" >> .env.local
+        echo "JWT_PASSPHRASE=test" >> .env.local
     
     - name: Start services with Docker Compose
       run: |
@@ -212,6 +234,10 @@ jobs:
         services:
           php:
             image: ${{ needs.build-images.outputs.php_image }}
+            environment:
+              - JWT_SECRET_KEY=%kernel.project_dir%/config/jwt/private.pem
+              - JWT_PUBLIC_KEY=%kernel.project_dir%/config/jwt/public.pem
+              - JWT_PASSPHRASE=test
           frontend:
             image: ${{ needs.build-images.outputs.frontend_image }}
         EOL
