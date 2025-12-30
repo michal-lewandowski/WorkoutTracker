@@ -138,7 +138,7 @@ test.describe('Workout Session Management', () => {
   // View Workout Session Tests
   // ============================================
 
-  test('Utworzona sesja jest widoczna na liście', async ({ page }) => {
+  test('Created session is visible in the list', async ({ page }) => {
     // Create a workout first
     await page.goto('/dashboard/sessions/new');
     

@@ -79,7 +79,7 @@ export function useWorkoutSessionsInfinite(filters?: InfiniteScrollFilters) {
     const params = new URLSearchParams({
       limit: '20',
       offset: String(pageIndex * 20),
-      sortBy: 'createdAt',
+      sortBy: 'date',
       sortOrder: 'desc',
     });
 

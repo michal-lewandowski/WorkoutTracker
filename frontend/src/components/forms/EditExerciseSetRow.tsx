@@ -193,7 +193,12 @@ export function EditExerciseSetRow({
           max={500}
           step={0.5}
           value={localValue.weightKg}
-          onChange={(e) => handleChange('weightKg', Number(e.target.value))}
+          onFocus={(e) => {
+            if (localValue.weightKg === 0) {
+              e.target.value = "";
+            }
+          }}
+          onChange={(e) => handleChange('weightKg', e.target.value === "" ? 0 : Number(e.target.value))}
           error={hasError ? ' ' : undefined}
           className="h-10"
         />

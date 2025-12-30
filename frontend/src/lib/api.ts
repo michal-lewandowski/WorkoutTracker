@@ -65,7 +65,14 @@ class ApiClient {
     if (response.status === 401) {
       if (typeof window !== 'undefined') {
         localStorage.removeItem('auth_token');
-        window.location.href = '/login';
+        
+        // Don't redirect if we're already on the login page or attempting to login
+        const isLoginRequest = endpoint === '/auth/login';
+        const isOnLoginPage = window.location.pathname === '/login';
+        
+        if (!isLoginRequest && !isOnLoginPage) {
+          window.location.href = '/login';
+        }
       }
       throw new ApiError('Unauthorized', 401);
     }

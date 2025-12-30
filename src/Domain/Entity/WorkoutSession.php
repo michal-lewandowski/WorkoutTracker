@@ -47,6 +47,7 @@ class WorkoutSession
     private \DateTimeImmutable $updatedAt;
 
     #[ORM\OneToMany(targetEntity: WorkoutExercise::class, mappedBy: 'workoutSession', cascade: ['persist', 'remove'])]
+    #[ORM\OrderBy(['orderInWorkout' => 'DESC'])]
     private Collection $workoutExercises;
 
     private function __construct(
@@ -76,6 +77,27 @@ class WorkoutSession
         ?string $notes = null,
     ): self {
         return new self($id, $user, $date, $name, $notes);
+    }
+
+    public function update(
+        \DateTimeImmutable $date,
+        ?string $name = null,
+        ?string $notes = null,
+    ): void {
+        $this->date = $date;
+        $this->name = $name;
+        $this->notes = $notes;
+        $this->updatedAt = new \DateTimeImmutable();
+    }
+
+    public function delete(User $deletedBy): void
+    {
+        if ($this->isDeleted()) {
+            throw new \LogicException('Workout session is already deleted');
+        }
+
+        $this->deletedAt = new \DateTimeImmutable();
+        $this->deletedBy = $deletedBy;
     }
 
     public function getId(): string
@@ -134,26 +156,5 @@ class WorkoutSession
     public function isDeleted(): bool
     {
         return null !== $this->deletedAt;
-    }
-
-    public function update(
-        \DateTimeImmutable $date,
-        ?string $name = null,
-        ?string $notes = null,
-    ): void {
-        $this->date = $date;
-        $this->name = $name;
-        $this->notes = $notes;
-        $this->updatedAt = new \DateTimeImmutable();
-    }
-
-    public function delete(User $deletedBy): void
-    {
-        if ($this->isDeleted()) {
-            throw new \LogicException('Workout session is already deleted');
-        }
-
-        $this->deletedAt = new \DateTimeImmutable();
-        $this->deletedBy = $deletedBy;
     }
 }

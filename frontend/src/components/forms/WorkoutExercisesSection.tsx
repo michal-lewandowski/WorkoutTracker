@@ -18,7 +18,7 @@ import { WorkoutExerciseItem } from './WorkoutExerciseItem';
 export function WorkoutExercisesSection() {
   const { control } = useFormContext<WorkoutSessionFormData>();
 
-  const { fields, append, remove } = useFieldArray({
+  const { fields, append, prepend, remove } = useFieldArray({
     control,
     name: 'exercises',
   });
@@ -28,7 +28,7 @@ export function WorkoutExercisesSection() {
   // ============================================
 
   const handleAddExercise = (exerciseId: string) => {
-    append({
+    prepend({
       exerciseId,
       sets: [
         {

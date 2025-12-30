@@ -33,24 +33,30 @@ class WorkoutExercise
     #[ORM\OneToMany(targetEntity: ExerciseSet::class, mappedBy: 'workoutExercise', cascade: ['persist', 'remove'], orphanRemoval: true)]
     private Collection $exerciseSets;
 
+    #[ORM\Column(type: 'integer')]
+    private int $orderInWorkout;
+
     private function __construct(
         Uuid $id,
         WorkoutSession $workoutSession,
         Exercise $exercise,
+        int $orderInWorkout,
     ) {
         $this->id = (string) $id;
         $this->workoutSession = $workoutSession;
         $this->exercise = $exercise;
         $this->createdAt = new \DateTimeImmutable();
         $this->exerciseSets = new ArrayCollection();
+        $this->orderInWorkout = $orderInWorkout;
     }
 
     public static function create(
         Uuid $id,
         WorkoutSession $workoutSession,
         Exercise $exercise,
+        int $orderInWorkout,
     ): self {
-        return new self($id, $workoutSession, $exercise);
+        return new self($id, $workoutSession, $exercise, $orderInWorkout);
     }
 
     public function getId(): string
@@ -66,6 +72,11 @@ class WorkoutExercise
     public function getExercise(): Exercise
     {
         return $this->exercise;
+    }
+
+    public function getOrderInWorkout(): int
+    {
+        return $this->orderInWorkout;
     }
 
     public function getCreatedAt(): \DateTimeImmutable

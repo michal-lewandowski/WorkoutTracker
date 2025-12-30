@@ -54,6 +54,8 @@ export function LoginForm() {
         // Handle general API errors
         if (error.status === 401) {
           setGlobalError('Nieprawidłowy email lub hasło');
+          // Prevent form from being submitted again automatically
+          return;
         } else {
           setGlobalError(error.message || 'Wystąpił błąd podczas logowania');
         }

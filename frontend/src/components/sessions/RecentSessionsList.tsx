@@ -20,7 +20,7 @@ export function RecentSessionsList() {
   const { sessions, isLoading, error } = useWorkoutSessions({
     limit: 7,
     offset: 0,
-    sortBy: 'createdAt',
+    sortBy: 'date',
     sortOrder: 'desc',
   });
 

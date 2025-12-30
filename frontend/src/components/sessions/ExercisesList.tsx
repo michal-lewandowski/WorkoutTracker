@@ -92,7 +92,7 @@ export function ExercisesList({ exercises }: ExercisesListProps) {
                 <div className="flex-1">
                   <div className="flex items-center gap-2">
                     <span className="flex items-center justify-center w-8 h-8 bg-blue-100 text-blue-600 rounded-full font-semibold text-sm">
-                      {index + 1}
+                      {exercises.length - index}
                     </span>
                     <div>
                       <h3 className="font-semibold text-gray-900">
