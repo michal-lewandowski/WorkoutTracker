@@ -54,9 +54,8 @@ class WorkoutExercise
         Uuid $id,
         WorkoutSession $workoutSession,
         Exercise $exercise,
-        int $orderInWorkout,
     ): self {
-        return new self($id, $workoutSession, $exercise, $orderInWorkout);
+        return new self($id, $workoutSession, $exercise, $workoutSession->getWorkoutExercises()->count() + 1);
     }
 
     public function getId(): string

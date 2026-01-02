@@ -42,7 +42,7 @@ final readonly class CreateWorkoutExerciseHandler
             throw ExerciseNotFoundException::withId($command->exerciseId);
         }
 
-        $workoutExercise = WorkoutExercise::create($command->id, $workoutSession, $exercise, $workoutSession->getWorkoutExercises()->count() + 1);
+        $workoutExercise = WorkoutExercise::create($command->id, $workoutSession, $exercise);
 
         if (null !== $command->sets && count($command->sets) > 0) {
             foreach ($command->sets as $setData) {

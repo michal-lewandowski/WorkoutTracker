@@ -396,7 +396,7 @@ final class GetExerciseStatisticsControllerTest extends WebTestCase
         $em->persist($session);
         $em->flush();
 
-        $workoutEx = WorkoutExercise::create(Uuid::v4(), $session, $exercise);
+        $workoutEx = WorkoutExercise::create(Uuid::v4(), $session, $exercise, 1);
         $em->persist($workoutEx);
         $em->flush();
 
