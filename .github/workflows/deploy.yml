@@ -207,7 +207,9 @@ jobs:
                       restart: always
                       environment:
                         - NODE_ENV=production
-                  
+                        - NEXT_PUBLIC_API_URL=https://wtracker.bieda.it/api/v1
+                        - HOSTNAME=0.0.0.0
+                        - PORT=3000
                     nginx:
                       image: ${NGINX_IMAGE}
                       restart: always
