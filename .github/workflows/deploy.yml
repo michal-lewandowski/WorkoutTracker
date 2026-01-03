@@ -161,10 +161,10 @@ jobs:
         # Użytkownik deploy już istnieje na serwerze
         
         # Katalog aplikacji będzie w /home/deploy/workouttracker
-        mkdir -p ~/workouttracker
+        mkdir -p /home/deploy/workouttracker
 
         # Create docker-compose.yml
-        cat > ~/workouttracker/docker-compose.yml << 'EOFDC'
+        cat > /home/deploy/workouttracker/docker-compose.yml << 'EOFDC'
         version: '3.8'
 
         services:
@@ -178,7 +178,7 @@ jobs:
               - JWT_PUBLIC_KEY=%kernel.project_dir%/config/jwt/public.pem
               - JWT_PASSPHRASE=$JWT_PASSPHRASE
             volumes:
-              - ~/workouttracker/jwt:/app/config/jwt
+              - /home/deploy/workouttracker/jwt:/app/config/jwt
 
           frontend:
             image: $FRONTEND_IMAGE
@@ -203,21 +203,21 @@ jobs:
               - POSTGRES_USER=$DB_USER
               - POSTGRES_DB=$DB_NAME
             volumes:
-              - ~/workouttracker/postgres_data:/var/lib/postgresql/data
+              - /home/deploy/workouttracker/postgres_data:/var/lib/postgresql/data
 
         # Używamy lokalnych katalogów zamiast nazwanych volumenów Docker
         EOFDC
 
         # Create JWT keys directory
-        mkdir -p ~/workouttracker/jwt
-        echo "$JWT_PRIVATE_KEY" > ~/workouttracker/jwt/private.pem
-        echo "$JWT_PUBLIC_KEY" > ~/workouttracker/jwt/public.pem
-        chmod 600 ~/workouttracker/jwt/private.pem
-        chmod 600 ~/workouttracker/jwt/public.pem
+        mkdir -p /home/deploy/workouttracker/jwt
+        echo "$JWT_PRIVATE_KEY" > /home/deploy/workouttracker/jwt/private.pem
+        echo "$JWT_PUBLIC_KEY" > /home/deploy/workouttracker/jwt/public.pem
+        chmod 600 /home/deploy/workouttracker/jwt/private.pem
+        chmod 600 /home/deploy/workouttracker/jwt/public.pem
 
         # Zamiast używać perl/sed, użyjemy prostej metody z tymczasowym plikiem
         # Zapisujemy zmienne do pliku .env
-        cat > ~/workouttracker/.env << EOF
+        cat > /home/deploy/workouttracker/.env << EOF
         PHP_IMAGE=$PHP_IMAGE
         FRONTEND_IMAGE=$FRONTEND_IMAGE
         NGINX_IMAGE=$NGINX_IMAGE
@@ -229,53 +229,53 @@ jobs:
         EOF
         
         # Zmieniamy docker-compose.yml, aby używał zmiennych z pliku .env
-        cat > ~/workouttracker/docker-compose.yml << 'EOF'
-        version: '3.8'
-        
-        services:
-          php:
-            image: ${PHP_IMAGE}
-            restart: always
-            environment:
-              - APP_ENV=prod
-              - DATABASE_URL=${DATABASE_URL}
-              - JWT_SECRET_KEY=%kernel.project_dir%/config/jwt/private.pem
-              - JWT_PUBLIC_KEY=%kernel.project_dir%/config/jwt/public.pem
-              - JWT_PASSPHRASE=${JWT_PASSPHRASE}
-            volumes:
-              - ~/workouttracker/jwt:/app/config/jwt
-        
-          frontend:
-            image: ${FRONTEND_IMAGE}
-            restart: always
-            environment:
-              - NODE_ENV=production
-        
-          nginx:
-            image: ${NGINX_IMAGE}
-            restart: always
-            ports:
-              - "80:80"
-            depends_on:
-              - php
-              - frontend
-        
-          db:
-            image: postgres:15
-            restart: always
-            environment:
-              - POSTGRES_PASSWORD=${DB_PASSWORD}
-              - POSTGRES_USER=${DB_USER}
-              - POSTGRES_DB=${DB_NAME}
-            volumes:
-              - ~/workouttracker/postgres_data:/var/lib/postgresql/data
-        EOF
+        cat > /home/deploy/workouttracker/docker-compose.yml << 'EOF'
+version: '3.8'
+
+services:
+  php:
+    image: ${PHP_IMAGE}
+    restart: always
+    environment:
+      - APP_ENV=prod
+      - DATABASE_URL=${DATABASE_URL}
+      - JWT_SECRET_KEY=%kernel.project_dir%/config/jwt/private.pem
+      - JWT_PUBLIC_KEY=%kernel.project_dir%/config/jwt/public.pem
+      - JWT_PASSPHRASE=${JWT_PASSPHRASE}
+    volumes:
+      - /home/deploy/workouttracker/jwt:/app/config/jwt
+
+  frontend:
+    image: ${FRONTEND_IMAGE}
+    restart: always
+    environment:
+      - NODE_ENV=production
+
+  nginx:
+    image: ${NGINX_IMAGE}
+    restart: always
+    ports:
+      - "80:80"
+    depends_on:
+      - php
+      - frontend
+
+  db:
+    image: postgres:15
+    restart: always
+    environment:
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_DB=${DB_NAME}
+    volumes:
+      - /home/deploy/workouttracker/postgres_data:/var/lib/postgresql/data
+EOF
 
         # Logowanie do GitHub Container Registry (ghcr.io)
         echo "$GITHUB_TOKEN" | docker login ghcr.io -u deploy --password-stdin
         
         # Pull latest images
-        cd ~/workouttracker
+        cd /home/deploy/workouttracker
         docker compose pull
 
         # Stop existing containers and remove them
