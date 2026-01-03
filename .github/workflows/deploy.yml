@@ -83,6 +83,8 @@ jobs:
                   labels: ${{ steps.meta-frontend.outputs.labels }}
                   cache-from: type=gha,scope=frontend
                   cache-to: type=gha,mode=max,scope=frontend
+                  build-args: |
+                      NEXT_PUBLIC_API_URL=https://wtracker.bieda.it/api/v1
 
             # Build Nginx image
             - name: Extract Docker metadata for Nginx
@@ -207,7 +209,6 @@ jobs:
                       restart: always
                       environment:
                         - NODE_ENV=production
-                        - NEXT_PUBLIC_API_URL=https://wtracker.bieda.it/api/v1
                         - HOSTNAME=0.0.0.0
                         - PORT=3000
                     nginx:
