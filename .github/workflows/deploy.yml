@@ -100,29 +100,29 @@ jobs:
       run: |
         mkdir -p .docker/nginx/conf.d
         cat > .docker/nginx/conf.d/default.conf << 'EOF'
-server {
-    listen 80;
-    server_name _;
-    
-    location / {
-        proxy_pass http://frontend:3000;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-    }
+        server {
+            listen 80;
+            server_name _;
+            
+            location / {
+                proxy_pass http://frontend:3000;
+                proxy_set_header Host $host;
+                proxy_set_header X-Real-IP $remote_addr;
+            }
 
-    location /api {
-        proxy_pass http://php:80;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-    }
-}
+            location /api {
+                proxy_pass http://php:80;
+                proxy_set_header Host $host;
+                proxy_set_header X-Real-IP $remote_addr;
+            }
+        }
 EOF
 
     - name: Create Nginx Dockerfile
       run: |
         cat > .docker/nginx/Dockerfile << 'EOF'
-FROM nginx:alpine
-COPY ./conf.d/default.conf /etc/nginx/conf.d/default.conf
+        FROM nginx:alpine
+        COPY ./conf.d/default.conf /etc/nginx/conf.d/default.conf
 EOF
 
     - name: Build and push Nginx image
@@ -153,106 +153,106 @@ EOF
     - name: Create deploy script
       run: |
         cat > deploy.sh << 'EOF'
-#!/bin/bash
-set -e
+        #!/bin/bash
+        set -e
 
-# Create deploy user if not exists
-id -u deploy &>/dev/null || sudo useradd -m -s /bin/bash deploy
+        # Create deploy user if not exists
+        id -u deploy &>/dev/null || sudo useradd -m -s /bin/bash deploy
 
-# Setup SSH for deploy user
-sudo mkdir -p /home/deploy/.ssh
-echo "$SSH_PUBLIC_KEY" | sudo tee -a /home/deploy/.ssh/authorized_keys
-sudo chown -R deploy:deploy /home/deploy/.ssh
-sudo chmod 700 /home/deploy/.ssh
-sudo chmod 600 /home/deploy/.ssh/authorized_keys
+        # Setup SSH for deploy user
+        sudo mkdir -p /home/deploy/.ssh
+        echo "$SSH_PUBLIC_KEY" | sudo tee -a /home/deploy/.ssh/authorized_keys
+        sudo chown -R deploy:deploy /home/deploy/.ssh
+        sudo chmod 700 /home/deploy/.ssh
+        sudo chmod 600 /home/deploy/.ssh/authorized_keys
 
-# Setup app directory
-sudo mkdir -p /opt/workouttracker
-sudo chown -R deploy:deploy /opt/workouttracker
+        # Setup app directory
+        sudo mkdir -p /opt/workouttracker
+        sudo chown -R deploy:deploy /opt/workouttracker
 
 # Create docker-compose.yml
 cat > /opt/workouttracker/docker-compose.yml << 'EOFDC'
-version: '3.8'
+        version: '3.8'
 
-services:
-  php:
-    image: $PHP_IMAGE
-    restart: always
-    environment:
-      - APP_ENV=prod
-      - DATABASE_URL=$DATABASE_URL
-      - JWT_SECRET_KEY=%kernel.project_dir%/config/jwt/private.pem
-      - JWT_PUBLIC_KEY=%kernel.project_dir%/config/jwt/public.pem
-      - JWT_PASSPHRASE=$JWT_PASSPHRASE
-    volumes:
-      - jwt_keys:/app/config/jwt
+        services:
+          php:
+            image: $PHP_IMAGE
+            restart: always
+            environment:
+              - APP_ENV=prod
+              - DATABASE_URL=$DATABASE_URL
+              - JWT_SECRET_KEY=%kernel.project_dir%/config/jwt/private.pem
+              - JWT_PUBLIC_KEY=%kernel.project_dir%/config/jwt/public.pem
+              - JWT_PASSPHRASE=$JWT_PASSPHRASE
+            volumes:
+              - jwt_keys:/app/config/jwt
 
-  frontend:
-    image: $FRONTEND_IMAGE
-    restart: always
-    environment:
-      - NODE_ENV=production
+          frontend:
+            image: $FRONTEND_IMAGE
+            restart: always
+            environment:
+              - NODE_ENV=production
 
-  nginx:
-    image: $NGINX_IMAGE
-    restart: always
-    ports:
-      - "80:80"
-    depends_on:
-      - php
-      - frontend
+          nginx:
+            image: $NGINX_IMAGE
+            restart: always
+            ports:
+              - "80:80"
+            depends_on:
+              - php
+              - frontend
 
-  db:
-    image: postgres:15
-    restart: always
-    environment:
-      - POSTGRES_PASSWORD=$DB_PASSWORD
-      - POSTGRES_USER=$DB_USER
-      - POSTGRES_DB=$DB_NAME
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
+          db:
+            image: postgres:15
+            restart: always
+            environment:
+              - POSTGRES_PASSWORD=$DB_PASSWORD
+              - POSTGRES_USER=$DB_USER
+              - POSTGRES_DB=$DB_NAME
+            volumes:
+              - postgres_data:/var/lib/postgresql/data
 
-volumes:
-  postgres_data:
-  jwt_keys:
+        volumes:
+          postgres_data:
+          jwt_keys:
 EOFDC
 
-# Create JWT keys directory
-mkdir -p /opt/workouttracker/jwt
-echo "$JWT_PRIVATE_KEY" > /opt/workouttracker/jwt/private.pem
-echo "$JWT_PUBLIC_KEY" > /opt/workouttracker/jwt/public.pem
-chmod 600 /opt/workouttracker/jwt/private.pem
-chmod 600 /opt/workouttracker/jwt/public.pem
+        # Create JWT keys directory
+        mkdir -p /opt/workouttracker/jwt
+        echo "$JWT_PRIVATE_KEY" > /opt/workouttracker/jwt/private.pem
+        echo "$JWT_PUBLIC_KEY" > /opt/workouttracker/jwt/public.pem
+        chmod 600 /opt/workouttracker/jwt/private.pem
+        chmod 600 /opt/workouttracker/jwt/public.pem
 
-# Update environment variables
-sed -i "s|\$PHP_IMAGE|$PHP_IMAGE|g" /opt/workouttracker/docker-compose.yml
-sed -i "s|\$FRONTEND_IMAGE|$FRONTEND_IMAGE|g" /opt/workouttracker/docker-compose.yml
-sed -i "s|\$NGINX_IMAGE|$NGINX_IMAGE|g" /opt/workouttracker/docker-compose.yml
-sed -i "s|\$DATABASE_URL|$DATABASE_URL|g" /opt/workouttracker/docker-compose.yml
-sed -i "s|\$JWT_PASSPHRASE|$JWT_PASSPHRASE|g" /opt/workouttracker/docker-compose.yml
-sed -i "s|\$DB_PASSWORD|$DB_PASSWORD|g" /opt/workouttracker/docker-compose.yml
-sed -i "s|\$DB_USER|$DB_USER|g" /opt/workouttracker/docker-compose.yml
-sed -i "s|\$DB_NAME|$DB_NAME|g" /opt/workouttracker/docker-compose.yml
+        # Update environment variables
+        sed -i "s|\$PHP_IMAGE|$PHP_IMAGE|g" /opt/workouttracker/docker-compose.yml
+        sed -i "s|\$FRONTEND_IMAGE|$FRONTEND_IMAGE|g" /opt/workouttracker/docker-compose.yml
+        sed -i "s|\$NGINX_IMAGE|$NGINX_IMAGE|g" /opt/workouttracker/docker-compose.yml
+        sed -i "s|\$DATABASE_URL|$DATABASE_URL|g" /opt/workouttracker/docker-compose.yml
+        sed -i "s|\$JWT_PASSPHRASE|$JWT_PASSPHRASE|g" /opt/workouttracker/docker-compose.yml
+        sed -i "s|\$DB_PASSWORD|$DB_PASSWORD|g" /opt/workouttracker/docker-compose.yml
+        sed -i "s|\$DB_USER|$DB_USER|g" /opt/workouttracker/docker-compose.yml
+        sed -i "s|\$DB_NAME|$DB_NAME|g" /opt/workouttracker/docker-compose.yml
 
-# Pull latest images
-cd /opt/workouttracker
-docker-compose pull
+        # Pull latest images
+        cd /opt/workouttracker
+        docker-compose pull
 
-# Stop existing containers and remove them
-docker-compose down || true
+        # Stop existing containers and remove them
+        docker-compose down || true
 
-# Start new containers
-docker-compose up -d
+        # Start new containers
+        docker-compose up -d
 
-# Wait for database to be ready
-echo "Waiting for database to be ready..."
-sleep 10
+        # Wait for database to be ready
+        echo "Waiting for database to be ready..."
+        sleep 10
 
-# Run migrations and seed exercises
-docker-compose exec -T php php bin/console doctrine:migrations:migrate --no-interaction
-docker-compose exec -T php php bin/console app:seed:exercises
+        # Run migrations and seed exercises
+        docker-compose exec -T php php bin/console doctrine:migrations:migrate --no-interaction
+        docker-compose exec -T php php bin/console app:seed:exercises
 
-echo "Deployment completed successfully!"
+        echo "Deployment completed successfully!"
 EOF
         chmod +x deploy.sh
 
