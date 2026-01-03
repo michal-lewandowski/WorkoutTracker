@@ -10,7 +10,7 @@ use Symfony\Component\Uid\Uuid;
 #[ORM\Entity]
 #[ORM\Table(name: 'exercise_sets')]
 #[ORM\Index(name: 'idx_exercise_sets_workout_exercise_id', columns: ['workout_exercise_id'])]
-readonly class ExerciseSet
+class ExerciseSet
 {
     #[ORM\Id]
     #[ORM\Column(type: 'uuid', unique: true)]
