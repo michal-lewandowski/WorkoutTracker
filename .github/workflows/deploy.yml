@@ -1,278 +1,306 @@
 name: Deploy to Production VPS
 
-# WAŻNE: W YAML, wszystkie znaczniki końcowe EOF muszą być wcięte dokładnie tak samo jak linia z << 'EOF'
-
 on:
-  workflow_dispatch:  # Manual trigger only
+    workflow_dispatch:
 
 jobs:
-  build-prod-images:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
-    outputs:
-      php_image: ${{ steps.meta-php.outputs.tags }}
-      frontend_image: ${{ steps.meta-frontend.outputs.tags }}
-      nginx_image: ${{ steps.meta-nginx.outputs.tags }}
-      commit_sha: ${{ steps.commit-sha.outputs.sha }}
+    build-prod-images:
+        runs-on: ubuntu-latest
+        permissions:
+            contents: read
+            packages: write
+        outputs:
+            php_image: ${{ steps.image-tags.outputs.php_image }}
+            frontend_image: ${{ steps.image-tags.outputs.frontend_image }}
+            nginx_image: ${{ steps.image-tags.outputs.nginx_image }}
+            commit_sha: ${{ steps.commit-sha.outputs.sha }}
 
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
 
-    - name: Get commit SHA
-      id: commit-sha
-      run: |
-        echo "sha=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
-        echo "Commit SHA: $(git rev-parse --short HEAD)"
+            - name: Get commit SHA
+              id: commit-sha
+              run: |
+                  echo "sha=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
 
-    - name: Set repository name to lowercase
-      id: repo-name
-      run: |
-        REPO_NAME=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
-        echo "repo_name_lower=$REPO_NAME" >> $GITHUB_OUTPUT
-        echo "Repository name lowercase: $REPO_NAME"
+            - name: Set repository name to lowercase
+              id: repo-name
+              run: |
+                  REPO_NAME=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
+                  echo "repo_name_lower=$REPO_NAME" >> $GITHUB_OUTPUT
 
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v3
+            - name: Set up Docker Buildx
+              uses: docker/setup-buildx-action@v3
 
-    - name: Log in to the Container registry
-      uses: docker/login-action@v3
-      with:
-        registry: ghcr.io
-        username: ${{ github.actor }}
-        password: ${{ secrets.GITHUB_TOKEN }}
-        
-    # Build and push PHP image
-    - name: Extract Docker metadata for PHP
-      id: meta-php
-      uses: docker/metadata-action@v5
-      with:
-        images: ghcr.io/${{ steps.repo-name.outputs.repo_name_lower }}-php
-        tags: |
-          type=sha,format=short
-          latest
+            - name: Log in to the Container registry
+              uses: docker/login-action@v3
+              with:
+                  registry: ghcr.io
+                  username: ${{ github.actor }}
+                  password: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Build and push PHP image
-      uses: docker/build-push-action@v5
-      with:
-        context: .
-        file: ./Dockerfile
-        target: frankenphp_prod
-        push: true
-        tags: ${{ steps.meta-php.outputs.tags }}
-        labels: ${{ steps.meta-php.outputs.labels }}
-        cache-from: type=gha
-        cache-to: type=gha,mode=max
-    
-    # Build and push Frontend image
-    - name: Extract Docker metadata for Frontend
-      id: meta-frontend
-      uses: docker/metadata-action@v5
-      with:
-        images: ghcr.io/${{ steps.repo-name.outputs.repo_name_lower }}-frontend
-        tags: |
-          type=sha,format=short
-          latest
+            # Build PHP image
+            - name: Extract Docker metadata for PHP
+              id: meta-php
+              uses: docker/metadata-action@v5
+              with:
+                  images: ghcr.io/${{ steps.repo-name.outputs.repo_name_lower }}-php
+                  tags: |
+                      type=sha,format=short,prefix=
+                      type=raw,value=latest
 
-    - name: Build and push Frontend image
-      uses: docker/build-push-action@v5
-      with:
-        context: ./frontend
-        file: ./frontend/Dockerfile
-        target: runner
-        push: true
-        tags: ${{ steps.meta-frontend.outputs.tags }}
-        labels: ${{ steps.meta-frontend.outputs.labels }}
-        cache-from: type=gha
-        cache-to: type=gha,mode=max
-    
-    # Build and push Nginx image (if you have a separate Nginx config)
-    - name: Extract Docker metadata for Nginx
-      id: meta-nginx
-      uses: docker/metadata-action@v5
-      with:
-        images: ghcr.io/${{ steps.repo-name.outputs.repo_name_lower }}-nginx
-        tags: |
-          type=sha,format=short
-          latest
+            - name: Build and push PHP image
+              uses: docker/build-push-action@v5
+              with:
+                  context: .
+                  file: ./Dockerfile
+                  target: frankenphp_prod
+                  push: true
+                  tags: ${{ steps.meta-php.outputs.tags }}
+                  labels: ${{ steps.meta-php.outputs.labels }}
+                  cache-from: type=gha,scope=php
+                  cache-to: type=gha,mode=max,scope=php
 
-    - name: Prepare Nginx configuration
-      run: |
-        mkdir -p .docker/nginx/conf.d
-        cat > .docker/nginx/conf.d/default.conf << 'EOF'
-        server {
-            listen 80;
-            server_name _;
-            
-            location / {
-                proxy_pass http://frontend:3000;
-                proxy_set_header Host $$host;
-                proxy_set_header X-Real-IP $$remote_addr;
-            }
+            # Build Frontend image
+            - name: Extract Docker metadata for Frontend
+              id: meta-frontend
+              uses: docker/metadata-action@v5
+              with:
+                  images: ghcr.io/${{ steps.repo-name.outputs.repo_name_lower }}-frontend
+                  tags: |
+                      type=sha,format=short,prefix=
+                      type=raw,value=latest
 
-            location /api {
-                proxy_pass http://php:80;
-                proxy_set_header Host $$host;
-                proxy_set_header X-Real-IP $$remote_addr;
-            }
-        }
-        EOF
+            - name: Build and push Frontend image
+              uses: docker/build-push-action@v5
+              with:
+                  context: ./frontend
+                  file: ./frontend/Dockerfile
+                  target: runner
+                  push: true
+                  tags: ${{ steps.meta-frontend.outputs.tags }}
+                  labels: ${{ steps.meta-frontend.outputs.labels }}
+                  cache-from: type=gha,scope=frontend
+                  cache-to: type=gha,mode=max,scope=frontend
 
-    - name: Create Nginx Dockerfile
-      run: |
-        cat > .docker/nginx/Dockerfile << 'EOF'
-        FROM nginx:alpine
-        COPY ./conf.d/default.conf /etc/nginx/conf.d/default.conf
-        EOF
+            # Build Nginx image
+            - name: Extract Docker metadata for Nginx
+              id: meta-nginx
+              uses: docker/metadata-action@v5
+              with:
+                  images: ghcr.io/${{ steps.repo-name.outputs.repo_name_lower }}-nginx
+                  tags: |
+                      type=sha,format=short,prefix=
+                      type=raw,value=latest
 
-    - name: Build and push Nginx image
-      uses: docker/build-push-action@v5
-      with:
-        context: ./.docker/nginx
-        file: ./.docker/nginx/Dockerfile
-        push: true
-        tags: ${{ steps.meta-nginx.outputs.tags }}
-        labels: ${{ steps.meta-nginx.outputs.labels }}
+            - name: Prepare Nginx configuration
+              run: |
+                  mkdir -p .docker/nginx/conf.d
+                  cat > .docker/nginx/conf.d/default.conf << 'EOF'
+                  server {
+                      listen 80;
+                      server_name _;
+                  
+                      location / {
+                          proxy_pass http://frontend:3000;
+                          proxy_set_header Host $host;
+                          proxy_set_header X-Real-IP $remote_addr;
+                          proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                          proxy_set_header X-Forwarded-Proto $scheme;
+                      }
+                  
+                      location /api {
+                          proxy_pass http://php:80;
+                          proxy_set_header Host $host;
+                          proxy_set_header X-Real-IP $remote_addr;
+                          proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                          proxy_set_header X-Forwarded-Proto $scheme;
+                      }
+                  }
+                  EOF
 
-  deploy:
-    runs-on: ubuntu-latest
-    needs: build-prod-images
-    environment: production
-    
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
-      
-    - name: Create SSH key
-      run: |
-        mkdir -p ~/.ssh
-        echo "${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-        chmod 600 ~/.ssh/id_rsa
-        ssh-keyscan -p 10107 dawid107.mikrus.xyz >> ~/.ssh/known_hosts
-      
-    - name: Create deploy script
-      run: |
-        cat > deploy.sh << 'EOF'
-        #!/bin/bash
-        set -e
+            - name: Create Nginx Dockerfile
+              run: |
+                  cat > .docker/nginx/Dockerfile << 'EOF'
+                  FROM nginx:alpine
+                  COPY ./conf.d/default.conf /etc/nginx/conf.d/default.conf
+                  EOF
 
-        # Użytkownik deploy już istnieje na serwerze
-        echo "Starting deployment..."
-        
-        # Katalog aplikacji będzie w /home/deploy/workouttracker
-        mkdir -p /home/deploy/workouttracker
-        mkdir -p /home/deploy/workouttracker/jwt
-        
-        # Create JWT keys 
-        echo "$JWT_PRIVATE_KEY" > /home/deploy/workouttracker/jwt/private.pem
-        echo "$JWT_PUBLIC_KEY" > /home/deploy/workouttracker/jwt/public.pem
-        chmod 600 /home/deploy/workouttracker/jwt/private.pem
-        chmod 600 /home/deploy/workouttracker/jwt/public.pem
-        
-        # Create docker-compose.yml file with environment variables directly
-        cat > /home/deploy/workouttracker/docker-compose.yml << EOFCOMPOSE
-        version: '3.8'
-        
-        services:
-          php:
-            image: ${PHP_IMAGE}
-            restart: always
-            environment:
-              - APP_ENV=prod
-              - DATABASE_URL=${DATABASE_URL}
-              - JWT_SECRET_KEY=%kernel.project_dir%/config/jwt/private.pem
-              - JWT_PUBLIC_KEY=%kernel.project_dir%/config/jwt/public.pem
-              - JWT_PASSPHRASE=${JWT_PASSPHRASE}
-            volumes:
-              - /home/deploy/workouttracker/jwt:/app/config/jwt
-        
-          frontend:
-            image: ${FRONTEND_IMAGE}
-            restart: always
-            environment:
-              - NODE_ENV=production
-        
-          nginx:
-            image: ${NGINX_IMAGE}
-            restart: always
-            ports:
-              - "80:80"
-            depends_on:
-              - php
-              - frontend
-        
-          db:
-            image: postgres:15
-            restart: always
-            environment:
-              - POSTGRES_PASSWORD=${DB_PASSWORD}
-              - POSTGRES_USER=${DB_USER}
-              - POSTGRES_DB=${DB_NAME}
-            volumes:
-              - /home/deploy/workouttracker/postgres_data:/var/lib/postgresql/data
-        EOFCOMPOSE
+            - name: Build and push Nginx image
+              uses: docker/build-push-action@v5
+              with:
+                  context: ./.docker/nginx
+                  file: ./.docker/nginx/Dockerfile
+                  push: true
+                  tags: ${{ steps.meta-nginx.outputs.tags }}
+                  labels: ${{ steps.meta-nginx.outputs.labels }}
+                  cache-from: type=gha,scope=nginx
+                  cache-to: type=gha,mode=max,scope=nginx
 
-        # Logowanie do GitHub Container Registry (ghcr.io)
-        echo "$GITHUB_TOKEN" | docker login ghcr.io -u deploy --password-stdin
-        
-        # Pull latest images
-        cd /home/deploy/workouttracker
-        docker compose pull
+            # Extract specific image tags with SHA
+            - name: Set specific image tags
+              id: image-tags
+              run: |
+                  PHP_IMAGE="ghcr.io/${{ steps.repo-name.outputs.repo_name_lower }}-php:${{ steps.commit-sha.outputs.sha }}"
+                  FRONTEND_IMAGE="ghcr.io/${{ steps.repo-name.outputs.repo_name_lower }}-frontend:${{ steps.commit-sha.outputs.sha }}"
+                  NGINX_IMAGE="ghcr.io/${{ steps.repo-name.outputs.repo_name_lower }}-nginx:${{ steps.commit-sha.outputs.sha }}"
+                  
+                  echo "php_image=$PHP_IMAGE" >> $GITHUB_OUTPUT
+                  echo "frontend_image=$FRONTEND_IMAGE" >> $GITHUB_OUTPUT
+                  echo "nginx_image=$NGINX_IMAGE" >> $GITHUB_OUTPUT
 
-        # Stop existing containers and remove them
-        docker compose down || true
+    deploy:
+        runs-on: ubuntu-latest
+        needs: build-prod-images
+        environment: production
 
-        # Start new containers
-        docker compose up -d
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
 
-        # Wait for database to be ready
-        echo "Waiting for database to be ready..."
-        sleep 10
+            - name: Create SSH key
+              run: |
+                  mkdir -p ~/.ssh
+                  echo "${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+                  chmod 600 ~/.ssh/id_rsa
+                  ssh-keyscan -p 10107 dawid107.mikrus.xyz >> ~/.ssh/known_hosts
 
-        # Run migrations and seed exercises
-        docker compose exec -T php php bin/console doctrine:migrations:migrate --no-interaction
-        docker compose exec -T php php bin/console app:seed:exercises
+            - name: Create deploy script
+              run: |
+                  cat > deploy.sh << 'EOF'
+                  #!/bin/bash
+                  set -e
+                  
+                  echo "Starting deployment..."
+                  
+                  # Create application directory structure
+                  mkdir -p /home/deploy/workouttracker/jwt
+                  
+                  # Create JWT keys from environment variables
+                  echo "$JWT_PRIVATE_KEY" > /home/deploy/workouttracker/jwt/private.pem
+                  echo "$JWT_PUBLIC_KEY" > /home/deploy/workouttracker/jwt/public.pem
+                  chmod 600 /home/deploy/workouttracker/jwt/private.pem
+                  chmod 600 /home/deploy/workouttracker/jwt/public.pem
+                  
+                  # Create docker-compose.yml
+                  cat > /home/deploy/workouttracker/docker-compose.yml << EOFCOMPOSE
+                  version: '3.8'
+                  
+                  services:
+                    php:
+                      image: ${PHP_IMAGE}
+                      restart: always
+                      environment:
+                        - APP_ENV=prod
+                        - DATABASE_URL=${DATABASE_URL}
+                        - JWT_SECRET_KEY=%kernel.project_dir%/config/jwt/private.pem
+                        - JWT_PUBLIC_KEY=%kernel.project_dir%/config/jwt/public.pem
+                        - JWT_PASSPHRASE=${JWT_PASSPHRASE}
+                      volumes:
+                        - /home/deploy/workouttracker/jwt:/app/config/jwt:ro
+                      depends_on:
+                        - db
+                  
+                    frontend:
+                      image: ${FRONTEND_IMAGE}
+                      restart: always
+                      environment:
+                        - NODE_ENV=production
+                  
+                    nginx:
+                      image: ${NGINX_IMAGE}
+                      restart: always
+                      ports:
+                        - "80:80"
+                      depends_on:
+                        - php
+                        - frontend
+                  
+                    db:
+                      image: postgres:15
+                      restart: always
+                      environment:
+                        - POSTGRES_PASSWORD=${DB_PASSWORD}
+                        - POSTGRES_USER=${DB_USER}
+                        - POSTGRES_DB=${DB_NAME}
+                      volumes:
+                        - /home/deploy/workouttracker/postgres_data:/var/lib/postgresql/data
+                  EOFCOMPOSE
+                  
+                  # Login to GitHub Container Registry
+                  echo "$GITHUB_TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
+                  
+                  # Navigate to app directory
+                  cd /home/deploy/workouttracker
+                  
+                  # Pull latest images
+                  docker compose pull
+                  
+                  # Stop and remove existing containers
+                  docker compose down
+                  
+                  # Start new containers
+                  docker compose up -d
+                  
+                  # Wait for database
+                  echo "Waiting for database to be ready..."
+                  sleep 15
+                  
+                  # Run migrations
+                  docker compose exec -T php php bin/console doctrine:migrations:migrate --no-interaction || {
+                    echo "Migration failed, checking logs..."
+                    docker compose logs php
+                    exit 1
+                  }
+                  
+                  # Seed exercises
+                  docker compose exec -T php php bin/console app:seed:exercises || {
+                    echo "Seeding failed, checking logs..."
+                    docker compose logs php
+                    exit 1
+                  }
+                  
+                  echo "Deployment completed successfully!"
+                  EOF
+                  chmod +x deploy.sh
 
-        echo "Deployment completed successfully!"
-        EOF
-        chmod +x deploy.sh
-
-    - name: Deploy to VPS
-      env:
-        PHP_IMAGE: ${{ needs.build-prod-images.outputs.php_image }}
-        FRONTEND_IMAGE: ${{ needs.build-prod-images.outputs.frontend_image }}
-        NGINX_IMAGE: ${{ needs.build-prod-images.outputs.nginx_image }}
-        COMMIT_SHA: ${{ needs.build-prod-images.outputs.commit_sha }}
-        SSH_PUBLIC_KEY: ${{ secrets.DEPLOY_SSH_PUBLIC_KEY }}
-        DATABASE_URL: ${{ secrets.DATABASE_URL }}
-        JWT_PASSPHRASE: ${{ secrets.JWT_PASSPHRASE }}
-        JWT_PRIVATE_KEY: ${{ secrets.JWT_PRIVATE_KEY }}
-        JWT_PUBLIC_KEY: ${{ secrets.JWT_PUBLIC_KEY }}
-        DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-        DB_USER: ${{ secrets.DB_USER }}
-        DB_NAME: ${{ secrets.DB_NAME }}
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: |
-        # Use first tag from each image output
-        PHP_IMAGE=$(echo "$PHP_IMAGE" | head -n 1)
-        FRONTEND_IMAGE=$(echo "$FRONTEND_IMAGE" | head -n 1)
-        NGINX_IMAGE=$(echo "$NGINX_IMAGE" | head -n 1)
-        
-        echo "Deploying PHP image: $PHP_IMAGE"
-        echo "Deploying Frontend image: $FRONTEND_IMAGE"
-        echo "Deploying Nginx image: $NGINX_IMAGE"
-        
-        scp -P 10107 deploy.sh deploy@dawid107.mikrus.xyz:~/deploy.sh
-        ssh -p 10107 deploy@dawid107.mikrus.xyz "export PHP_IMAGE=\"$PHP_IMAGE\" \
-          FRONTEND_IMAGE=\"$FRONTEND_IMAGE\" \
-          NGINX_IMAGE=\"$NGINX_IMAGE\" \
-          DATABASE_URL=\"$DATABASE_URL\" \
-          JWT_PASSPHRASE=\"$JWT_PASSPHRASE\" \
-          SSH_PUBLIC_KEY=\"$SSH_PUBLIC_KEY\" \
-          DB_PASSWORD=\"$DB_PASSWORD\" \
-          DB_USER=\"$DB_USER\" \
-          DB_NAME=\"$DB_NAME\" \
-          GITHUB_TOKEN=\"$GITHUB_TOKEN\" \
-          && bash ~/deploy.sh"
+            - name: Deploy to VPS
+              env:
+                  PHP_IMAGE: ${{ needs.build-prod-images.outputs.php_image }}
+                  FRONTEND_IMAGE: ${{ needs.build-prod-images.outputs.frontend_image }}
+                  NGINX_IMAGE: ${{ needs.build-prod-images.outputs.nginx_image }}
+                  DATABASE_URL: ${{ secrets.DATABASE_URL }}
+                  JWT_PASSPHRASE: ${{ secrets.JWT_PASSPHRASE }}
+                  JWT_PRIVATE_KEY: ${{ secrets.JWT_PRIVATE_KEY }}
+                  JWT_PUBLIC_KEY: ${{ secrets.JWT_PUBLIC_KEY }}
+                  DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+                  DB_USER: ${{ secrets.DB_USER }}
+                  DB_NAME: ${{ secrets.DB_NAME }}
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              run: |
+                  echo "Deploying:"
+                  echo "  PHP: $PHP_IMAGE"
+                  echo "  Frontend: $FRONTEND_IMAGE"
+                  echo "  Nginx: $NGINX_IMAGE"
+                  
+                  # Copy deploy script
+                  scp -P 10107 deploy.sh deploy@dawid107.mikrus.xyz:~/deploy.sh
+                  
+                  # Execute deployment with all environment variables
+                  ssh -p 10107 deploy@dawid107.mikrus.xyz bash << ENDSSH
+                  export PHP_IMAGE="$PHP_IMAGE"
+                  export FRONTEND_IMAGE="$FRONTEND_IMAGE"
+                  export NGINX_IMAGE="$NGINX_IMAGE"
+                  export DATABASE_URL="$DATABASE_URL"
+                  export JWT_PASSPHRASE="$JWT_PASSPHRASE"
+                  export JWT_PRIVATE_KEY="$JWT_PRIVATE_KEY"
+                  export JWT_PUBLIC_KEY="$JWT_PUBLIC_KEY"
+                  export DB_PASSWORD="$DB_PASSWORD"
+                  export DB_USER="$DB_USER"
+                  export DB_NAME="$DB_NAME"
+                  export GITHUB_TOKEN="$GITHUB_TOKEN"
+                  export GITHUB_ACTOR="${{ github.actor }}"
+                  
+                  bash ~/deploy.sh
+                  ENDSSH
