@@ -158,22 +158,13 @@ jobs:
         #!/bin/bash
         set -e
 
-        # Create deploy user if not exists
-        id -u deploy &>/dev/null || sudo useradd -m -s /bin/bash deploy
-
-        # Setup SSH for deploy user
-        sudo mkdir -p /home/deploy/.ssh
-        echo "$SSH_PUBLIC_KEY" | sudo tee -a /home/deploy/.ssh/authorized_keys
-        sudo chown -R deploy:deploy /home/deploy/.ssh
-        sudo chmod 700 /home/deploy/.ssh
-        sudo chmod 600 /home/deploy/.ssh/authorized_keys
-
-        # Setup app directory
-        sudo mkdir -p /opt/workouttracker
-        sudo chown -R deploy:deploy /opt/workouttracker
+        # Użytkownik deploy już istnieje na serwerze
+        
+        # Katalog aplikacji będzie w /home/deploy/workouttracker
+        mkdir -p ~/workouttracker
 
         # Create docker-compose.yml
-        cat > /opt/workouttracker/docker-compose.yml << 'EOFDC'
+        cat > ~/workouttracker/docker-compose.yml << 'EOFDC'
         version: '3.8'
 
         services:
@@ -187,7 +178,7 @@ jobs:
               - JWT_PUBLIC_KEY=%kernel.project_dir%/config/jwt/public.pem
               - JWT_PASSPHRASE=$JWT_PASSPHRASE
             volumes:
-              - jwt_keys:/app/config/jwt
+              - ~/workouttracker/jwt:/app/config/jwt
 
           frontend:
             image: $FRONTEND_IMAGE
@@ -212,32 +203,30 @@ jobs:
               - POSTGRES_USER=$DB_USER
               - POSTGRES_DB=$DB_NAME
             volumes:
-              - postgres_data:/var/lib/postgresql/data
+              - ~/workouttracker/postgres_data:/var/lib/postgresql/data
 
-        volumes:
-          postgres_data:
-          jwt_keys:
+        # Używamy lokalnych katalogów zamiast nazwanych volumenów Docker
         EOFDC
 
         # Create JWT keys directory
-        mkdir -p /opt/workouttracker/jwt
-        echo "$JWT_PRIVATE_KEY" > /opt/workouttracker/jwt/private.pem
-        echo "$JWT_PUBLIC_KEY" > /opt/workouttracker/jwt/public.pem
-        chmod 600 /opt/workouttracker/jwt/private.pem
-        chmod 600 /opt/workouttracker/jwt/public.pem
+        mkdir -p ~/workouttracker/jwt
+        echo "$JWT_PRIVATE_KEY" > ~/workouttracker/jwt/private.pem
+        echo "$JWT_PUBLIC_KEY" > ~/workouttracker/jwt/public.pem
+        chmod 600 ~/workouttracker/jwt/private.pem
+        chmod 600 ~/workouttracker/jwt/public.pem
 
         # Update environment variables
-        sed -i "s|\$PHP_IMAGE|$PHP_IMAGE|g" /opt/workouttracker/docker-compose.yml
-        sed -i "s|\$FRONTEND_IMAGE|$FRONTEND_IMAGE|g" /opt/workouttracker/docker-compose.yml
-        sed -i "s|\$NGINX_IMAGE|$NGINX_IMAGE|g" /opt/workouttracker/docker-compose.yml
-        sed -i "s|\$DATABASE_URL|$DATABASE_URL|g" /opt/workouttracker/docker-compose.yml
-        sed -i "s|\$JWT_PASSPHRASE|$JWT_PASSPHRASE|g" /opt/workouttracker/docker-compose.yml
-        sed -i "s|\$DB_PASSWORD|$DB_PASSWORD|g" /opt/workouttracker/docker-compose.yml
-        sed -i "s|\$DB_USER|$DB_USER|g" /opt/workouttracker/docker-compose.yml
-        sed -i "s|\$DB_NAME|$DB_NAME|g" /opt/workouttracker/docker-compose.yml
+        sed -i "s|\$PHP_IMAGE|$PHP_IMAGE|g" ~/workouttracker/docker-compose.yml
+        sed -i "s|\$FRONTEND_IMAGE|$FRONTEND_IMAGE|g" ~/workouttracker/docker-compose.yml
+        sed -i "s|\$NGINX_IMAGE|$NGINX_IMAGE|g" ~/workouttracker/docker-compose.yml
+        sed -i "s|\$DATABASE_URL|$DATABASE_URL|g" ~/workouttracker/docker-compose.yml
+        sed -i "s|\$JWT_PASSPHRASE|$JWT_PASSPHRASE|g" ~/workouttracker/docker-compose.yml
+        sed -i "s|\$DB_PASSWORD|$DB_PASSWORD|g" ~/workouttracker/docker-compose.yml
+        sed -i "s|\$DB_USER|$DB_USER|g" ~/workouttracker/docker-compose.yml
+        sed -i "s|\$DB_NAME|$DB_NAME|g" ~/workouttracker/docker-compose.yml
 
         # Pull latest images
-        cd /opt/workouttracker
+        cd ~/workouttracker
         docker-compose pull
 
         # Stop existing containers and remove them
@@ -282,8 +271,8 @@ jobs:
         echo "Deploying Frontend image: $FRONTEND_IMAGE"
         echo "Deploying Nginx image: $NGINX_IMAGE"
         
-        scp -P 10107 deploy.sh root@dawid107.mikrus.xyz:/tmp/deploy.sh
-        ssh -p 10107 root@dawid107.mikrus.xyz "export PHP_IMAGE=\"$PHP_IMAGE\" \
+        scp -P 10107 deploy.sh deploy@dawid107.mikrus.xyz:~/deploy.sh
+        ssh -p 10107 deploy@dawid107.mikrus.xyz "export PHP_IMAGE=\"$PHP_IMAGE\" \
           FRONTEND_IMAGE=\"$FRONTEND_IMAGE\" \
           NGINX_IMAGE=\"$NGINX_IMAGE\" \
           DATABASE_URL=\"$DATABASE_URL\" \
@@ -292,4 +281,4 @@ jobs:
           DB_PASSWORD=\"$DB_PASSWORD\" \
           DB_USER=\"$DB_USER\" \
           DB_NAME=\"$DB_NAME\" \
-          && bash /tmp/deploy.sh"
+          && bash ~/deploy.sh"
