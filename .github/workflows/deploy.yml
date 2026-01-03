@@ -215,33 +215,34 @@ jobs:
         chmod 600 ~/workouttracker/jwt/private.pem
         chmod 600 ~/workouttracker/jwt/public.pem
 
-        # Update environment variables
-        sed -i "s|\$PHP_IMAGE|$PHP_IMAGE|g" ~/workouttracker/docker-compose.yml
-        sed -i "s|\$FRONTEND_IMAGE|$FRONTEND_IMAGE|g" ~/workouttracker/docker-compose.yml
-        sed -i "s|\$NGINX_IMAGE|$NGINX_IMAGE|g" ~/workouttracker/docker-compose.yml
-        sed -i "s|\$DATABASE_URL|$DATABASE_URL|g" ~/workouttracker/docker-compose.yml
-        sed -i "s|\$JWT_PASSPHRASE|$JWT_PASSPHRASE|g" ~/workouttracker/docker-compose.yml
-        sed -i "s|\$DB_PASSWORD|$DB_PASSWORD|g" ~/workouttracker/docker-compose.yml
-        sed -i "s|\$DB_USER|$DB_USER|g" ~/workouttracker/docker-compose.yml
-        sed -i "s|\$DB_NAME|$DB_NAME|g" ~/workouttracker/docker-compose.yml
+        # Update environment variables - używamy pojedynczych cudzysłowów w sed dla bezpieczeństwa
+        # i escape'ujemy znaki specjalne w zmiennych
+        perl -pi -e "s#\\\$PHP_IMAGE#$PHP_IMAGE#g" ~/workouttracker/docker-compose.yml
+        perl -pi -e "s#\\\$FRONTEND_IMAGE#$FRONTEND_IMAGE#g" ~/workouttracker/docker-compose.yml
+        perl -pi -e "s#\\\$NGINX_IMAGE#$NGINX_IMAGE#g" ~/workouttracker/docker-compose.yml
+        perl -pi -e "s#\\\$DATABASE_URL#$DATABASE_URL#g" ~/workouttracker/docker-compose.yml
+        perl -pi -e "s#\\\$JWT_PASSPHRASE#$JWT_PASSPHRASE#g" ~/workouttracker/docker-compose.yml
+        perl -pi -e "s#\\\$DB_PASSWORD#$DB_PASSWORD#g" ~/workouttracker/docker-compose.yml
+        perl -pi -e "s#\\\$DB_USER#$DB_USER#g" ~/workouttracker/docker-compose.yml
+        perl -pi -e "s#\\\$DB_NAME#$DB_NAME#g" ~/workouttracker/docker-compose.yml
 
         # Pull latest images
         cd ~/workouttracker
-        docker-compose pull
+        docker compose pull
 
         # Stop existing containers and remove them
-        docker-compose down || true
+        docker compose down || true
 
         # Start new containers
-        docker-compose up -d
+        docker compose up -d
 
         # Wait for database to be ready
         echo "Waiting for database to be ready..."
         sleep 10
 
         # Run migrations and seed exercises
-        docker-compose exec -T php php bin/console doctrine:migrations:migrate --no-interaction
-        docker-compose exec -T php php bin/console app:seed:exercises
+        docker compose exec -T php php bin/console doctrine:migrations:migrate --no-interaction
+        docker compose exec -T php php bin/console app:seed:exercises
 
         echo "Deployment completed successfully!"
         EOF
