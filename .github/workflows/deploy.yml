@@ -173,46 +173,46 @@ jobs:
         
         # Create docker-compose.yml file with environment variables directly
         cat > /home/deploy/workouttracker/docker-compose.yml << EOFCOMPOSE
-version: '3.8'
-
-services:
-  php:
-    image: ${PHP_IMAGE}
-    restart: always
-    environment:
-      - APP_ENV=prod
-      - DATABASE_URL=${DATABASE_URL}
-      - JWT_SECRET_KEY=%kernel.project_dir%/config/jwt/private.pem
-      - JWT_PUBLIC_KEY=%kernel.project_dir%/config/jwt/public.pem
-      - JWT_PASSPHRASE=${JWT_PASSPHRASE}
-    volumes:
-      - /home/deploy/workouttracker/jwt:/app/config/jwt
-
-  frontend:
-    image: ${FRONTEND_IMAGE}
-    restart: always
-    environment:
-      - NODE_ENV=production
-
-  nginx:
-    image: ${NGINX_IMAGE}
-    restart: always
-    ports:
-      - "80:80"
-    depends_on:
-      - php
-      - frontend
-
-  db:
-    image: postgres:15
-    restart: always
-    environment:
-      - POSTGRES_PASSWORD=${DB_PASSWORD}
-      - POSTGRES_USER=${DB_USER}
-      - POSTGRES_DB=${DB_NAME}
-    volumes:
-      - /home/deploy/workouttracker/postgres_data:/var/lib/postgresql/data
-EOFCOMPOSE
+        version: '3.8'
+        
+        services:
+          php:
+            image: ${PHP_IMAGE}
+            restart: always
+            environment:
+              - APP_ENV=prod
+              - DATABASE_URL=${DATABASE_URL}
+              - JWT_SECRET_KEY=%kernel.project_dir%/config/jwt/private.pem
+              - JWT_PUBLIC_KEY=%kernel.project_dir%/config/jwt/public.pem
+              - JWT_PASSPHRASE=${JWT_PASSPHRASE}
+            volumes:
+              - /home/deploy/workouttracker/jwt:/app/config/jwt
+        
+          frontend:
+            image: ${FRONTEND_IMAGE}
+            restart: always
+            environment:
+              - NODE_ENV=production
+        
+          nginx:
+            image: ${NGINX_IMAGE}
+            restart: always
+            ports:
+              - "80:80"
+            depends_on:
+              - php
+              - frontend
+        
+          db:
+            image: postgres:15
+            restart: always
+            environment:
+              - POSTGRES_PASSWORD=${DB_PASSWORD}
+              - POSTGRES_USER=${DB_USER}
+              - POSTGRES_DB=${DB_NAME}
+            volumes:
+              - /home/deploy/workouttracker/postgres_data:/var/lib/postgresql/data
+        EOFCOMPOSE
 
         # Logowanie do GitHub Container Registry (ghcr.io)
         echo "$GITHUB_TOKEN" | docker login ghcr.io -u deploy --password-stdin
