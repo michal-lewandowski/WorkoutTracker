@@ -1,10 +1,10 @@
-name: Deploy to Production
+name: Deploy to Production VPS
 
 on:
   workflow_dispatch:  # Manual trigger only
 
 jobs:
-  build-images:
+  build-prod-images:
     runs-on: ubuntu-latest
     permissions:
       contents: read
