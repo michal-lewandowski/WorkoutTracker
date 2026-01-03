@@ -226,6 +226,9 @@ jobs:
         perl -pi -e "s#\\\$DB_USER#$DB_USER#g" ~/workouttracker/docker-compose.yml
         perl -pi -e "s#\\\$DB_NAME#$DB_NAME#g" ~/workouttracker/docker-compose.yml
 
+        # Logowanie do GitHub Container Registry (ghcr.io)
+        echo "$GITHUB_TOKEN" | docker login ghcr.io -u deploy --password-stdin
+        
         # Pull latest images
         cd ~/workouttracker
         docker compose pull
@@ -262,6 +265,7 @@ jobs:
         DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
         DB_USER: ${{ secrets.DB_USER }}
         DB_NAME: ${{ secrets.DB_NAME }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         # Use first tag from each image output
         PHP_IMAGE=$(echo "$PHP_IMAGE" | head -n 1)
@@ -282,4 +286,5 @@ jobs:
           DB_PASSWORD=\"$DB_PASSWORD\" \
           DB_USER=\"$DB_USER\" \
           DB_NAME=\"$DB_NAME\" \
+          GITHUB_TOKEN=\"$GITHUB_TOKEN\" \
           && bash ~/deploy.sh"
