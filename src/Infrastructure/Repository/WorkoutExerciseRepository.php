@@ -71,7 +71,8 @@ final class WorkoutExerciseRepository extends ServiceEntityRepository implements
                 'ws.date as date',
                 'ws.createdAt as createdAt',
                 'ws.id as sessionId',
-                'MAX(es.weightGrams) as maxWeightGrams'
+                'MAX(es.weightGrams) as maxWeightGrams',
+                'SUM(es.setsCount * es.reps * es.weightGrams) as totalVolumeGrams'
             )
             ->join('we.workoutSession', 'ws')
             ->join('we.exerciseSets', 'es')
@@ -107,6 +108,7 @@ final class WorkoutExerciseRepository extends ServiceEntityRepository implements
                 'date' => $row['date'],
                 'sessionId' => (string) $row['sessionId'],
                 'maxWeightKg' => (float) $row['maxWeightGrams'] / 1000,
+                'totalVolumeKg' => (float) $row['totalVolumeGrams'] / 1000,
             ],
             $results
         );

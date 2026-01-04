@@ -17,7 +17,7 @@ interface WorkoutExerciseRepositoryInterface
     public function flush(): void;
 
     /**
-     * @return array<array{date: \DateTimeImmutable, sessionId: string, maxWeightKg: float}>
+     * @return array<array{date: \DateTimeImmutable, sessionId: string, maxWeightKg: float, totalVolumeKg: float}>
      */
     public function findMaxWeightPerSessionByExerciseAndUser(
         string $exerciseId,

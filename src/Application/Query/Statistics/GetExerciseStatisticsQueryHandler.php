@@ -42,6 +42,7 @@ final readonly class GetExerciseStatisticsQueryHandler
                 date: $point['date']->format('Y-m-d'),
                 sessionId: $point['sessionId'],
                 maxWeightKg: $point['maxWeightKg'],
+                totalVolume: $point['totalVolumeKg'],
             ),
             $rawDataPoints
         );
@@ -53,6 +54,7 @@ final readonly class GetExerciseStatisticsQueryHandler
                     'date' => $point['date']->format('Y-m-d'),
                     'sessionId' => $point['sessionId'],
                     'maxWeightKg' => $point['maxWeightKg'],
+                    'totalVolumeKg' => $point['totalVolumeKg'],
                 ],
                 $rawDataPoints
             );
@@ -61,8 +63,10 @@ final readonly class GetExerciseStatisticsQueryHandler
 
             $summary = new ExerciseStatisticsSummaryDto(
                 totalSessions: $rawSummary['totalSessions'],
-                personalRecord: $rawSummary['personalRecord'],
-                prDate: $rawSummary['prDate'],
+                maxWeightRecord: $rawSummary['personalWeightRecord'],
+                maxWeightRecordDate: $rawSummary['prDateMaxWeight'],
+                maxVolumeRecord: $rawSummary['personalVolumeRecord'],
+                maxVolumeRecordDate: $rawSummary['prDateMaxVolume'],
                 firstWeight: $rawSummary['firstWeight'],
                 latestWeight: $rawSummary['latestWeight'],
                 progressPercentage: $rawSummary['progressPercentage'],

@@ -7,9 +7,9 @@ namespace App\Domain\Service;
 final readonly class StatisticsCalculator
 {
     /**
-     * @param array<array{date: string, sessionId: string, maxWeightKg: float}> $dataPoints
+     * @param array<array{date: string, sessionId: string, maxWeightKg: float, totalVolumeKg: float}> $dataPoints
      *
-     * @return array{totalSessions: int, personalRecord: float, prDate: string, firstWeight: float, latestWeight: float, progressPercentage: float}
+     * @return array{totalSessions: int, personalWeightRecord: float, prDateMaxWeight: string, personalVolumeRecord: float, prDateMaxVolume: string,  firstWeight: float, latestWeight: float, progressPercentage: float}
      */
     public function calculateSummary(array $dataPoints): array
     {
@@ -17,12 +17,18 @@ final readonly class StatisticsCalculator
             throw new \InvalidArgumentException('Cannot calculate summary for empty data points');
         }
 
-        $personalRecord = 0.0;
-        $prDate = '';
+        $personalWeightRecord = 0.0;
+        $personalVolumeRecord = 0.0;
+        $prDateMaxWeight = '';
+        $prDateMaxVolume = '';
         foreach ($dataPoints as $point) {
-            if ($point['maxWeightKg'] > $personalRecord) {
-                $personalRecord = $point['maxWeightKg'];
-                $prDate = $point['date'];
+            if ($point['maxWeightKg'] > $personalWeightRecord) {
+                $personalWeightRecord = $point['maxWeightKg'];
+                $prDateMaxWeight = $point['date'];
+            }
+            if ($point['totalVolumeKg'] > $personalVolumeRecord) {
+                $personalVolumeRecord = $point['totalVolumeKg'];
+                $prDateMaxVolume = $point['date'];
             }
         }
 
@@ -33,8 +39,10 @@ final readonly class StatisticsCalculator
 
         return [
             'totalSessions' => count($dataPoints),
-            'personalRecord' => $personalRecord,
-            'prDate' => $prDate,
+            'personalWeightRecord' => $personalWeightRecord,
+            'personalVolumeRecord' => $personalVolumeRecord,
+            'prDateMaxWeight' => $prDateMaxWeight,
+            'prDateMaxVolume' => $prDateMaxVolume,
             'firstWeight' => $firstWeight,
             'latestWeight' => $latestWeight,
             'progressPercentage' => $progressPercentage,

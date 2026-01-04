@@ -246,8 +246,8 @@ final class GetExerciseStatisticsControllerTest extends WebTestCase
         // Sprawdź summary
         $this->assertNotNull($data['summary']);
         $this->assertEquals(3, $data['summary']['totalSessions']);
-        $this->assertEquals(77.5, $data['summary']['personalRecord']);
-        $this->assertEquals('2025-01-15', $data['summary']['prDate']);
+        $this->assertEquals(77.5, $data['summary']['maxWeightRecord']);
+        $this->assertEquals('2025-01-15', $data['summary']['maxWeightRecordDate']);
         $this->assertEquals(70.0, $data['summary']['firstWeight']);
         $this->assertEquals(77.5, $data['summary']['latestWeight']);
         
@@ -432,8 +432,8 @@ final class GetExerciseStatisticsControllerTest extends WebTestCase
         // Sprawdź summary
         $this->assertNotNull($data['summary']);
         $this->assertArrayHasKey('totalSessions', $data['summary']);
-        $this->assertArrayHasKey('personalRecord', $data['summary']);
-        $this->assertArrayHasKey('prDate', $data['summary']);
+        $this->assertArrayHasKey('maxWeightRecord', $data['summary']);
+        $this->assertArrayHasKey('maxWeightRecordDate', $data['summary']);
         $this->assertArrayHasKey('firstWeight', $data['summary']);
         $this->assertArrayHasKey('latestWeight', $data['summary']);
         $this->assertArrayHasKey('progressPercentage', $data['summary']);

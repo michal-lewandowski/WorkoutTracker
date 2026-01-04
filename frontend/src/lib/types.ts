@@ -184,11 +184,14 @@ export interface ExerciseStatistics {
     date: string;
     sessionId: string;
     maxWeightKg: number;
+    totalVolume: number;
   }[];
   summary: {
     totalSessions: number;
-    personalRecord: number;
-    prDate: string;
+    maxWeightRecord: number;
+    maxWeightRecordDate: string;
+    maxVolumeRecord: number;
+    maxVolumeRecordDate: string;
     firstWeight: number;
     latestWeight: number;
     progressPercentage: number;
