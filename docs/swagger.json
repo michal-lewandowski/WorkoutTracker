@@ -974,6 +974,100 @@
         }
       }
     },
+    "/statistics/done-exercises": {
+      "get": {
+        "tags": ["Statistics"],
+        "summary": "Get exercises performed by user",
+        "description": "Returns a list of all exercises that the authenticated user has performed at least once in any workout session. Supports date range filtering and sorting options.",
+        "operationId": "getDoneExercises",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "dateFrom",
+            "in": "query",
+            "description": "Filter sessions from this date (inclusive, ISO 8601 format: YYYY-MM-DD)",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date",
+              "example": "2024-01-01"
+            }
+          },
+          {
+            "name": "dateTo",
+            "in": "query",
+            "description": "Filter sessions until this date (inclusive, ISO 8601 format: YYYY-MM-DD)",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date",
+              "example": "2024-12-31"
+            }
+          },
+          {
+            "name": "sortBy",
+            "in": "query",
+            "description": "Sort results by field",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": ["name", "createdAt", "lastUsed", "workoutsCount"],
+              "default": "name"
+            }
+          },
+          {
+            "name": "sortOrder",
+            "in": "query",
+            "description": "Sort order",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": ["asc", "desc"],
+              "default": "asc"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of exercises performed by user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DoneExercise"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request - Invalid query parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - User not authenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/statistics/dashboard": {
       "get": {
         "tags": ["Statistics"],
@@ -1151,6 +1245,44 @@
             "type": "string",
             "format": "date-time",
             "example": "2025-10-10T00:00:00Z"
+          }
+        }
+      },
+      "DoneExercise": {
+        "type": "object",
+        "required": ["id", "name", "workoutsCount", "muscleCategory", "createdAt", "updatedAt"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Exercise UUID",
+            "example": "c4194d1d-3eaf-4931-981c-9d7a8c01774a"
+          },
+          "name": {
+            "type": "string",
+            "description": "Exercise name",
+            "example": "Diamentowe pompki"
+          },
+          "workoutsCount": {
+            "type": "integer",
+            "description": "Number of workout sessions where this exercise was performed",
+            "example": 5,
+            "minimum": 1
+          },
+          "muscleCategory": {
+            "$ref": "#/components/schemas/MuscleCategory"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Exercise creation timestamp (ISO 8601)",
+            "example": "2026-01-03T20:15:41+00:00"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Exercise last update timestamp (ISO 8601)",
+            "example": "2026-01-03T20:15:41+00:00"
           }
         }
       },

@@ -49,6 +49,15 @@ export interface Exercise {
   createdAt: string;
 }
 
+export interface DoneExercise {
+  id: string;
+  name: string;
+  workoutsCount: number;
+  muscleCategory: MuscleCategory;
+  createdAt: string;
+  updatedAt: string;
+}
+
 // ============================================
 // Workout Sessions
 // ============================================

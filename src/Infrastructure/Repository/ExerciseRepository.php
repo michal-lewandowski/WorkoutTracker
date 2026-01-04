@@ -68,4 +68,60 @@ final class ExerciseRepository extends ServiceEntityRepository implements Exerci
                   ->getQuery()
                   ->getResult();
     }
+
+    public function findDoneExercisesByUser(
+        string $userId,
+        ?\DateTimeImmutable $dateFrom = null,
+        ?\DateTimeImmutable $dateTo = null,
+        string $sortBy = 'lastUsedDate',
+        string $sortOrder = 'asc',
+    ): array {
+        $qb = $this->createQueryBuilder('e')
+            ->select('e', 'COUNT(DISTINCT ws.id) as workoutsCount')
+            ->innerJoin('e.workoutExercises', 'we')
+            ->innerJoin('we.workoutSession', 'ws')
+            ->innerJoin('e.muscleCategory', 'mc')
+            ->addSelect('mc')
+            ->where('ws.user = :userId')
+            ->setParameter('userId', $userId)
+            ->groupBy('e.id')
+            ->addGroupBy('mc.id');
+
+        if (null !== $dateFrom) {
+            $qb->andWhere('ws.date >= :dateFrom')
+                ->setParameter('dateFrom', $dateFrom);
+        }
+
+        if (null !== $dateTo) {
+            $qb->andWhere('ws.date <= :dateTo')
+                ->setParameter('dateTo', $dateTo);
+        }
+        // Apply sorting
+        switch ($sortBy) {
+            case 'name':
+                $qb->orderBy('e.name', strtoupper($sortOrder));
+                break;
+            case 'createdAt':
+                $qb->orderBy('e.createdAt', strtoupper($sortOrder));
+                break;
+            case 'workoutsCount':
+                $qb->orderBy('workoutsCount', 'DESC');
+                break;
+            case 'lastUsed':
+                $qb->addSelect('MAX(ws.date) as HIDDEN lastUsedDate')
+                    ->orderBy('lastUsedDate', strtoupper($sortOrder));
+                break;
+        }
+
+        $result = $qb->getQuery()->getResult();
+
+        // Transform result to expected format: [['exercise' => Exercise, 'workoutsCount' => int], ...]
+        return array_map(
+            fn (array $row) => [
+                'exercise' => $row[0],
+                'workoutsCount' => (int) $row['workoutsCount'],
+            ],
+            $result
+        );
+    }
 }

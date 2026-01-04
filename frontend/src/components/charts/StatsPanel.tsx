@@ -6,7 +6,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useExercises } from '@/hooks/useExercises';
+import { useDoneExercises } from '@/hooks/useDoneExercises';
 import { useExerciseStatistics } from '@/hooks/useExerciseStatistics';
 import { Card, CardContent } from '@/components/ui/Card';
 import { Spinner } from '@/components/ui/Spinner';
@@ -17,7 +17,7 @@ import { ExerciseProgressChart } from './ExerciseProgressChart';
 // ============================================
 
 export function StatsPanel() {
-  const { exercises, isLoading: exercisesLoading } = useExercises();
+  const { exercises, isLoading: exercisesLoading } = useDoneExercises();
   const [selectedExerciseId, setSelectedExerciseId] = useState<string | null>(
     null
   );
@@ -68,7 +68,12 @@ export function StatsPanel() {
                 <option value="">-- Wybierz ćwiczenie --</option>
                 {exercises.map((exercise) => (
                   <option key={exercise.id} value={exercise.id}>
-                    {exercise.name}
+                    {exercise.name} ({exercise.workoutsCount}{' '}
+                    {exercise.workoutsCount === 1
+                      ? 'trening'
+                      : exercise.workoutsCount < 5
+                      ? 'treningi'
+                      : 'treningów'})
                   </option>
                 ))}
               </select>
