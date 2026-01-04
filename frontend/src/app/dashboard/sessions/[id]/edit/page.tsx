@@ -198,10 +198,7 @@ export default function EditWorkoutSessionPage({
           </svg>
           <div className="text-sm text-blue-800">
             <p className="font-medium mb-1">Automatyczne zapisywanie</p>
-            <p>
-              Zmiany w seriach są zapisywane automatycznie po 500ms od ostatniej
-              edycji. Metadane sesji wymagają kliknięcia przycisku "Zapisz".
-            </p>
+            <p>Zmiany w seriach są zapisywane automatycznie po 500ms od ostatniej edycji. Metadane sesji wymagają kliknięcia przycisku &quot;Zapisz&quot;.</p>
           </div>
         </div>
       </div>
