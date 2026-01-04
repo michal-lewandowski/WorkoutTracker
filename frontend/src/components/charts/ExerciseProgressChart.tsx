@@ -171,7 +171,7 @@ export function ExerciseProgressChart({
 
       {/* Summary Stats */}
       {statistics.summary && (
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-2 pt-6 border-t border-gray-200">
+        <div className="grid grid-cols-3 sm:grid-cols-3 gap-3 mt-2 pt-6 border-t border-gray-200">
           <div className="text-center">
             <p className="text-2xl font-bold text-gray-900">
               {statistics.summary.maxWeightRecord}
@@ -191,13 +191,6 @@ export function ExerciseProgressChart({
               {statistics.summary.totalSessions}
             </p>
             <p className="text-xs text-gray-600 mt-1">Sesje treningowe</p>
-          </div>
-          <div className="text-center">
-            <p className="text-2xl font-bold text-gray-900">
-              {statistics.summary.latestWeight}
-              <span className="text-sm text-gray-600"> kg</span>
-            </p>
-            <p className="text-xs text-gray-600 mt-1">Ostatni max ciężar</p>
           </div>
         </div>
       )}

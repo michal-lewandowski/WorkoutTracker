@@ -490,3 +490,4 @@ final class GetDoneExercisesControllerTest extends WebTestCase
     }
 }
 
+
