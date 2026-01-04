@@ -6,7 +6,7 @@
 'use client';
 
 import { useState } from 'react';
-import { WorkoutExercise } from '@/lib/types';
+import { WorkoutExercise, ExerciseSet, Exercise } from '@/lib/types';
 import { Button } from '@/components/ui/Button';
 import { Card, CardContent } from '@/components/ui/Card';
 import { EditExerciseSetRow } from './EditExerciseSetRow';
@@ -36,6 +36,9 @@ export function EditExercisesList({
 }: EditExercisesListProps) {
   const { exercises: allExercises } = useExercises();
   const [isAddingExercise, setIsAddingExercise] = useState(false);
+  const [pendingSets, setPendingSets] = useState<
+    Record<string, ExerciseSet[]>
+  >({});
 
   // ============================================
   // Add Exercise Handler
@@ -88,32 +91,56 @@ export function EditExercisesList({
   // Add Set Handler
   // ============================================
 
-  const handleAddSet = async (workoutExercise: WorkoutExercise) => {
-    const lastSet =
-      workoutExercise.exerciseSets[workoutExercise.exerciseSets.length - 1];
+  const handleAddSet = (workoutExercise: WorkoutExercise) => {
+    // Create a temporary set with a unique temporary ID
+    const tempSet: ExerciseSet = {
+      id: `temp-${Date.now()}`,
+      workoutExerciseId: workoutExercise.id,
+      setsCount: 1,
+      reps: 1,
+      weightKg: 0,
+      createdAt: new Date().toISOString(),
+    };
 
-    const newSets = [
-      ...workoutExercise.exerciseSets.map((set) => ({
-        setsCount: set.setsCount,
-        reps: set.reps,
-        weightKg: set.weightKg,
-      })),
-      {
-        setsCount: lastSet?.setsCount || 3,
-        reps: lastSet?.reps || 10,
-        weightKg: lastSet?.weightKg || 0,
-      },
-    ];
+    // Add to pending sets for this workout exercise
+    setPendingSets((prev) => ({
+      ...prev,
+      [workoutExercise.id]: [
+        ...(prev[workoutExercise.id] || []),
+        tempSet,
+      ],
+    }));
+  };
 
-    try {
-      await apiClient.put(`/workout-exercises/${workoutExercise.id}`, {
-        sets: newSets,
-      });
-      toast.success('Seria dodana');
+  // ============================================
+  // Handle Pending Set Update/Delete
+  // ============================================
+
+  const handlePendingSetUpdate = (workoutExerciseId: string) => {
+    // Clear pending sets for this exercise after successful save
+    setPendingSets((prev: Record<string, ExerciseSet[]>) => {
+      const newPending = { ...prev };
+      delete newPending[workoutExerciseId];
+      return newPending;
+    });
+    onUpdate();
+  };
+
+  const handlePendingSetDelete = (
+    workoutExerciseId: string,
+    setId: string
+  ) => {
+    if (setId.startsWith('temp-')) {
+      // Remove only this pending set
+      setPendingSets((prev: Record<string, ExerciseSet[]>) => ({
+        ...prev,
+        [workoutExerciseId]: (prev[workoutExerciseId] || []).filter(
+          (s: ExerciseSet) => s.id !== setId
+        ),
+      }));
+    } else {
+      // For real sets, trigger update from backend
       onUpdate();
-    } catch (error) {
-      console.error('Failed to add set:', error);
-      toast.error('Nie udało się dodać serii');
     }
   };
 
@@ -207,8 +234,14 @@ export function EditExercisesList({
         <div className="space-y-4">
           {exercises.map((workoutExercise, index) => {
             const exercise = allExercises.find(
-              (ex) => ex.id === workoutExercise.exerciseId
+              (ex: Exercise) => ex.id === workoutExercise.exerciseId
             );
+
+            // Combine real sets with pending sets
+            const allSetsForExercise = [
+              ...workoutExercise.exerciseSets,
+              ...(pendingSets[workoutExercise.id] || []),
+            ];
 
             return (
               <Card key={workoutExercise.id}>
@@ -261,14 +294,19 @@ export function EditExercisesList({
 
                   {/* Sets List */}
                   <div className="space-y-2">
-                    {workoutExercise.exerciseSets.map((set) => (
+                    {allSetsForExercise.map((set) => (
                       <EditExerciseSetRow
                         key={set.id}
                         set={set}
                         workoutExerciseId={workoutExercise.id}
-                        allSets={workoutExercise.exerciseSets}
-                        onUpdate={onUpdate}
-                        onDelete={onUpdate}
+                        allSets={allSetsForExercise}
+                        onUpdate={() =>
+                          handlePendingSetUpdate(workoutExercise.id)
+                        }
+                        onDelete={() =>
+                          handlePendingSetDelete(workoutExercise.id, set.id)
+                        }
+                        isPending={set.id.startsWith('temp-')}
                       />
                     ))}
                   </div>
@@ -279,7 +317,7 @@ export function EditExercisesList({
                     variant="outline"
                     size="sm"
                     onClick={() => handleAddSet(workoutExercise)}
-                    disabled={workoutExercise.exerciseSets.length >= 20}
+                    disabled={allSetsForExercise.length >= 20}
                     className="w-full"
                   >
                     <svg
@@ -296,8 +334,7 @@ export function EditExercisesList({
                       />
                     </svg>
                     Dodaj serię{' '}
-                    {workoutExercise.exerciseSets.length >= 20 &&
-                      '(maksymalnie 20)'}
+                    {allSetsForExercise.length >= 20 && '(maksymalnie 20)'}
                   </Button>
                 </CardContent>
               </Card>

@@ -1,17 +1,16 @@
 // ============================================
 // Edit Exercise Set Row Component
-// Inline editable set row with debounced auto-save
+// Inline editable set row with manual save
 // ============================================
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { ExerciseSet } from '@/lib/types';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { apiClient } from '@/lib/api';
 import { toast } from 'react-hot-toast';
-import { useDebounce } from '@/hooks/useDebounce';
 
 // ============================================
 // Props Interface
@@ -23,6 +22,7 @@ interface EditExerciseSetRowProps {
   allSets: ExerciseSet[];
   onUpdate: () => void;
   onDelete: () => void;
+  isPending?: boolean;
 }
 
 // ============================================
@@ -35,94 +35,120 @@ export function EditExerciseSetRow({
   allSets,
   onUpdate,
   onDelete,
+  isPending = false,
 }: EditExerciseSetRowProps) {
   const [localValue, setLocalValue] = useState({
-    setsCount: set.setsCount,
-    reps: set.reps,
-    weightKg: set.weightKg,
+    setsCount: set.setsCount.toString(),
+    reps: set.reps.toString(),
+    weightKg: set.weightKg.toString(),
   });
 
   const [isSaving, setIsSaving] = useState(false);
   const [hasError, setHasError] = useState(false);
-
-  // Debounce local value changes
-  const debouncedValue = useDebounce(localValue, 500);
+  const [hasChanges, setHasChanges] = useState(isPending);
 
   // ============================================
-  // Auto-save Effect
+  // Save Handler
   // ============================================
 
-  useEffect(() => {
-    // Don't save on initial mount
-    const isInitialValue =
-      debouncedValue.setsCount === set.setsCount &&
-      debouncedValue.reps === set.reps &&
-      debouncedValue.weightKg === set.weightKg;
-
-    if (isInitialValue) return;
+  const handleSave = async () => {
+    // Parse values
+    const setsCount = Number(localValue.setsCount);
+    const reps = Number(localValue.reps);
+    const weightKg = Number(localValue.weightKg || 0);
 
     // Validate values
     if (
-      debouncedValue.setsCount < 1 ||
-      debouncedValue.reps < 1 ||
-      debouncedValue.reps > 100 ||
-      debouncedValue.weightKg < 0 ||
-      debouncedValue.weightKg > 500
+      isNaN(setsCount) ||
+      isNaN(reps) ||
+      isNaN(weightKg) ||
+      setsCount < 1 ||
+      reps < 1 ||
+      reps > 100 ||
+      weightKg < 0 ||
+      weightKg > 500
     ) {
       setHasError(true);
+      toast.error('Nieprawidłowe wartości');
       return;
     }
 
     setHasError(false);
+    setIsSaving(true);
 
-    // Save to API
-    const saveChanges = async () => {
-      setIsSaving(true);
+    try {
+      // Prepare the updated sets array
+      let updatedSets;
 
-      try {
-        // Update the current set in the array
-        const updatedSets = allSets.map((s) =>
-          s.id === set.id
-            ? {
-                setsCount: debouncedValue.setsCount,
-                reps: debouncedValue.reps,
-                weightKg: debouncedValue.weightKg,
-              }
-            : {
-                setsCount: s.setsCount,
-                reps: s.reps,
-                weightKg: s.weightKg,
-              }
-        );
-
-        await apiClient.put(`/workout-exercises/${workoutExerciseId}`, {
-          sets: updatedSets,
-        });
-
-        onUpdate();
-      } catch (error) {
-        console.error('Failed to save set changes:', error);
-        toast.error('Nie udało się zapisać zmian');
-        setHasError(true);
-      } finally {
-        setIsSaving(false);
+      if (isPending) {
+        // For pending sets, add to the array (exclude temporary IDs)
+        updatedSets = [
+          ...allSets
+            .filter((s) => !s.id.startsWith('temp-'))
+            .map((s) => ({
+              setsCount: s.setsCount,
+              reps: s.reps,
+              weightKg: s.weightKg,
+            })),
+          {
+            setsCount: setsCount,
+            reps: reps,
+            weightKg: weightKg,
+          },
+        ];
+      } else {
+        // For existing sets, update in place
+        updatedSets = allSets
+          .filter((s) => !s.id.startsWith('temp-'))
+          .map((s) =>
+            s.id === set.id
+              ? {
+                  setsCount: setsCount,
+                  reps: reps,
+                  weightKg: weightKg,
+                }
+              : {
+                  setsCount: s.setsCount,
+                  reps: s.reps,
+                  weightKg: s.weightKg,
+                }
+          );
       }
-    };
 
-    saveChanges();
-  }, [debouncedValue]); // Only run when debounced value changes
+      await apiClient.put(`/workout-exercises/${workoutExerciseId}`, {
+        sets: updatedSets,
+      });
+
+      toast.success(isPending ? 'Seria dodana' : 'Zmiany zapisane');
+      setHasChanges(false);
+      onUpdate();
+    } catch (error) {
+      console.error('Failed to save set changes:', error);
+      toast.error('Nie udało się zapisać zmian');
+      setHasError(true);
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   // ============================================
   // Handlers
   // ============================================
 
-  const handleChange = (field: keyof typeof localValue, value: number) => {
+  const handleChange = (field: keyof typeof localValue, value: string) => {
     setLocalValue((prev) => ({ ...prev, [field]: value }));
     setHasError(false);
+    setHasChanges(true);
   };
 
   const handleDelete = async () => {
-    if (allSets.length === 1) {
+    // For pending sets, just remove from local state
+    if (isPending) {
+      onDelete();
+      return;
+    }
+
+    if (allSets.filter((s) => !s.id.startsWith('temp-')).length === 1) {
       toast.error('Ćwiczenie musi mieć co najmniej jedną serię');
       return;
     }
@@ -131,9 +157,9 @@ export function EditExerciseSetRow({
     if (!confirmed) return;
 
     try {
-      // Remove this set from the array
+      // Remove this set from the array (exclude temporary sets)
       const updatedSets = allSets
-        .filter((s) => s.id !== set.id)
+        .filter((s) => !s.id.startsWith('temp-') && s.id !== set.id)
         .map((s) => ({
           setsCount: s.setsCount,
           reps: s.reps,
@@ -165,7 +191,7 @@ export function EditExerciseSetRow({
           min={1}
           step={1}
           value={localValue.setsCount}
-          onChange={(e) => handleChange('setsCount', Number(e.target.value))}
+          onChange={(e) => handleChange('setsCount', e.target.value)}
           error={hasError ? ' ' : undefined}
           className="h-10"
         />
@@ -179,7 +205,7 @@ export function EditExerciseSetRow({
           max={100}
           step={1}
           value={localValue.reps}
-          onChange={(e) => handleChange('reps', Number(e.target.value))}
+          onChange={(e) => handleChange('reps', e.target.value)}
           error={hasError ? ' ' : undefined}
           className="h-10"
         />
@@ -193,12 +219,7 @@ export function EditExerciseSetRow({
           max={500}
           step={0.5}
           value={localValue.weightKg}
-          onFocus={(e) => {
-            if (localValue.weightKg === 0) {
-              e.target.value = "";
-            }
-          }}
-          onChange={(e) => handleChange('weightKg', e.target.value === "" ? 0 : Number(e.target.value))}
+          onChange={(e) => handleChange('weightKg', e.target.value)}
           error={hasError ? ' ' : undefined}
           className="h-10"
         />
@@ -206,30 +227,54 @@ export function EditExerciseSetRow({
 
       {/* Actions */}
       <div className="col-span-2 flex items-center gap-1">
-        {/* Saving indicator */}
-        {isSaving && (
-          <div className="text-xs text-gray-500" title="Zapisywanie...">
-            <svg
-              className="animate-spin h-4 w-4 text-blue-500"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-            >
-              <circle
-                className="opacity-25"
-                cx="12"
-                cy="12"
-                r="10"
+        {/* Save Button */}
+        {hasChanges && (
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={handleSave}
+            className="text-blue-600 hover:text-blue-700 h-10 w-10 p-0"
+            disabled={isSaving}
+            title="Zapisz zmiany"
+          >
+            {isSaving ? (
+              <svg
+                className="animate-spin h-5 w-5"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                ></circle>
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                ></path>
+              </svg>
+            ) : (
+              <svg
+                className="w-5 h-5"
+                fill="none"
                 stroke="currentColor"
-                strokeWidth="4"
-              ></circle>
-              <path
-                className="opacity-75"
-                fill="currentColor"
-                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-              ></path>
-            </svg>
-          </div>
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M5 13l4 4L19 7"
+                />
+              </svg>
+            )}
+          </Button>
         )}
 
         {/* Delete Button */}
