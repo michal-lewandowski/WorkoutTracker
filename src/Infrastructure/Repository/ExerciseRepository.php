@@ -83,6 +83,7 @@ final class ExerciseRepository extends ServiceEntityRepository implements Exerci
             ->innerJoin('e.muscleCategory', 'mc')
             ->addSelect('mc')
             ->where('ws.user = :userId')
+            ->andWhere('ws.deletedAt IS NULL')
             ->setParameter('userId', $userId)
             ->groupBy('e.id')
             ->addGroupBy('mc.id');
