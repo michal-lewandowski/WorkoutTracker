@@ -11,6 +11,8 @@ import { LoadingScreen } from '@/components/ui/Spinner';
 // User registration page
 // ============================================
 
+export const dynamic = 'force-dynamic';
+
 export default function RegisterPage() {
   const router = useRouter();
   const { user, isLoading } = useAuth();

@@ -212,7 +212,7 @@ export function EditExerciseSetRow({
       </div>
 
       {/* Weight */}
-      <div className="col-span-4">
+      <div className="col-span-3">
         <Input
           type="number"
           min={0}

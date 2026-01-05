@@ -28,11 +28,12 @@ final readonly class UpdateWorkoutExerciseHandler
 
         // Przekształć dane z command na format ułatwiający porównanie
         $newSets = [];
-        foreach ($command->sets as $setData) {
+        foreach ($command->sets as $i => $setData) {
             $newSets[] = [
                 'setsCount' => $setData['setsCount'],
                 'reps' => $setData['reps'],
                 'weightGrams' => (int) round($setData['weightKg'] * 1000),
+                'orderInExercise' => $i,
             ];
         }
 
@@ -47,6 +48,7 @@ final readonly class UpdateWorkoutExerciseHandler
                     $existingSet->getSetsCount() === $newSetData['setsCount']
                     && $existingSet->getReps() === $newSetData['reps']
                     && $existingSet->getWeightGrams() === $newSetData['weightGrams']
+                    && $existingSet->getOrderInExercise() === $newSetData['orderInExercise']
                 ) {
                     $matches = true;
                     // Usuń z tablicy newSets, aby nie dodać go ponownie
@@ -67,7 +69,8 @@ final readonly class UpdateWorkoutExerciseHandler
                 workoutExercise: $workoutExercise,
                 setsCount: $newSetData['setsCount'],
                 reps: $newSetData['reps'],
-                weightGrams: $newSetData['weightGrams']
+                weightGrams: $newSetData['weightGrams'],
+                orderInExercise: $newSetData['orderInExercise'],
             );
 
             $workoutExercise->getExerciseSets()->add($exerciseSet);

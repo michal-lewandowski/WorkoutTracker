@@ -13,6 +13,8 @@ import { ExpandableSessionCard } from '@/components/history/ExpandableSessionCar
 // Browse all workout sessions with infinite scroll
 // ============================================
 
+export const dynamic = 'force-dynamic';
+
 export default function HistoryPage() {
   const [dateFilter, setDateFilter] = useState<DateFilter | null>(null);
 

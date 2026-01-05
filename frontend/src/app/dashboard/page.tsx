@@ -11,6 +11,8 @@ import { StatsPanel } from '@/components/charts/StatsPanel';
 // Main dashboard with recent sessions and stats
 // ============================================
 
+export const dynamic = 'force-dynamic';
+
 export default function DashboardPage() {
   return (
     <div className="space-y-6">

@@ -7,6 +7,9 @@ export const metadata: Metadata = {
   description: 'Aplikacja do śledzenia postępów w treningu siłowym',
 };
 
+// Force dynamic rendering - required for AuthContext with localStorage
+export const dynamic = 'force-dynamic';
+
 export default function RootLayout({
   children,
 }: {

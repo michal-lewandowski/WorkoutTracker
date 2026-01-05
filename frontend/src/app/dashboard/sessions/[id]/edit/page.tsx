@@ -26,6 +26,8 @@ interface EditWorkoutSessionPageProps {
 // Component
 // ============================================
 
+export const dynamic = 'force-dynamic';
+
 export default function EditWorkoutSessionPage({
   params,
 }: EditWorkoutSessionPageProps) {

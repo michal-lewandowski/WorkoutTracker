@@ -10,6 +10,8 @@ import { LoadingScreen } from '@/components/ui/Spinner';
 // Redirects to appropriate page based on auth state
 // ============================================
 
+export const dynamic = 'force-dynamic';
+
 export default function HomePage() {
   const router = useRouter();
   const { user, isLoading } = useAuth();

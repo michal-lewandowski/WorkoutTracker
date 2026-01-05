@@ -31,7 +31,7 @@ class WorkoutExercise
     private \DateTimeImmutable $createdAt;
 
     #[ORM\OneToMany(targetEntity: ExerciseSet::class, mappedBy: 'workoutExercise', cascade: ['persist', 'remove'], orphanRemoval: true)]
-    #[ORM\OrderBy(['createdAt' => 'ASC'])]
+    #[ORM\OrderBy(['orderInExercise' => 'ASC'])]
     private Collection $exerciseSets;
 
     #[ORM\Column(type: 'integer')]

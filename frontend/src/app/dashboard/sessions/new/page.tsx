@@ -9,6 +9,8 @@ import { WorkoutSessionForm } from '@/components/forms/WorkoutSessionForm';
 // Create new workout session with exercises and sets
 // ============================================
 
+export const dynamic = 'force-dynamic';
+
 export default function NewWorkoutSessionPage() {
   const router = useRouter();
 

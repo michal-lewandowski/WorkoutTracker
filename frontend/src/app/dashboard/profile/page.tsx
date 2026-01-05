@@ -11,6 +11,8 @@ import { formatDate } from '@/lib/utils';
 // User profile and logout
 // ============================================
 
+export const dynamic = 'force-dynamic';
+
 export default function ProfilePage() {
   const router = useRouter();
   const { user, logout } = useAuth();

@@ -287,9 +287,9 @@ export function EditExercisesList({
                   {/* Sets Header */}
                   <div className="grid grid-cols-12 gap-2 text-sm font-medium text-gray-700 px-2">
                     <div className="col-span-3">Serie</div>
-                    <div className="col-span-4">Powtórzenia</div>
-                    <div className="col-span-4">Ciężar (kg)</div>
-                    <div className="col-span-1"></div>
+                    <div className="col-span-3">Powtórzenia</div>
+                    <div className="col-span-3">Ciężar (kg)</div>
+                    <div className="col-span-2"></div>
                   </div>
 
                   {/* Sets List */}

@@ -30,6 +30,8 @@ interface WorkoutSessionPageProps {
 // Component
 // ============================================
 
+export const dynamic = 'force-dynamic';
+
 export default function WorkoutSessionPage({
   params,
 }: WorkoutSessionPageProps) {

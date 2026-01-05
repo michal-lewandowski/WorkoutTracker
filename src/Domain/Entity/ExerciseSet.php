@@ -29,6 +29,9 @@ class ExerciseSet
     #[ORM\Column(name: 'weight_grams', type: 'integer', nullable: false)]
     private int $weightGrams;
 
+    #[ORM\Column(name: 'order_in_exercise', type: 'integer', nullable: false)]
+    private int $orderInExercise;
+
     #[ORM\Column(name: 'created_at', type: 'datetime_immutable', nullable: false)]
     private \DateTimeImmutable $createdAt;
 
@@ -37,12 +40,14 @@ class ExerciseSet
         int $setsCount,
         int $reps,
         int $weightGrams,
+        int $orderInExercise = 1,
     ) {
         $this->id = (string) Uuid::v4();
         $this->workoutExercise = $workoutExercise;
         $this->setsCount = $setsCount;
         $this->reps = $reps;
         $this->weightGrams = $weightGrams;
+        $this->orderInExercise = $orderInExercise;
         $this->createdAt = new \DateTimeImmutable();
     }
 
@@ -51,8 +56,9 @@ class ExerciseSet
         int $setsCount,
         int $reps,
         int $weightGrams,
+        int $orderInExercise = 1,
     ): self {
-        return new self($workoutExercise, $setsCount, $reps, $weightGrams);
+        return new self($workoutExercise, $setsCount, $reps, $weightGrams, $orderInExercise);
     }
 
     public function getId(): string
@@ -88,5 +94,10 @@ class ExerciseSet
     public function getWeightGrams(): int
     {
         return $this->weightGrams;
+    }
+
+    public function getOrderInExercise(): int
+    {
+        return $this->orderInExercise;
     }
 }
